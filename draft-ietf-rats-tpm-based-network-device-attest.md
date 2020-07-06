@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-rats-tpm-based-network-device-attestation-latest
+docname: draft-ietf-rats-tpm-based-network-device-attest-00
 cat: info
 pi:
   toc: 'yes'
@@ -502,7 +502,12 @@ after the system is operational.
 
 ### What Does RIV Attest?
 
-TPM attestation is strongly focused around Platform Configuration Registers (PCRs), but those registers are only vehicles for certifying accompanying Evidence, conveyed in log entries.  It is the hashes in log entries are extended into PCRs, where they can be retrieved in the form of a Quote signed by a key known only to the TPM (xref).  The use of multiple PCRs serves only to provide some independence between different classes of object, so that one class of objects can be updated without changing the extended hash for other classes.  Although PCRs can be used for any purpose, this section outlines the objects within the scope of this document which may be extended into the TPM.
+TPM attestation is strongly focused on Platform Configuration Registers (PCRs), but those registers are only vehicles for certifying 
+accompanying Evidence, conveyed in log entries.  It is the hashes in log entries are extended into PCRs, where the final digests 
+can be retrieved in the form of a Quote signed by a key known only to the TPM (xref).  The use of multiple PCRs serves only to 
+provide some independence between different classes of object, so that one class of objects can be updated without changing the 
+extended hash for other classes.  Although PCRs can be used for any purpose, this section outlines the objects within the 
+scope of this document which may be extended into the TPM.
 
 In general, PCRs are organized to independently attest three classes of object:
 
@@ -512,25 +517,36 @@ In general, PCRs are organized to independently attest three classes of object:
 
 * Credentials - Administrators may wish to verify via attestation that keys (and other credentials) outside the Root of Trust have not be subject to unauthorized tampering.  (By definition, keys inside the root of trust can't be verified independently)
 
-The TCG PC Client Platform Firmware Profile Specification {{PC-Client-BIOS-TPM-2.0}} gives considerable detail on what is to be measured during the boot phase of a platform boot using a UEFI BOIS (www.uefi.org), but the goal is simply to measure every bit of code executed in the process of starting the device, along with any configuration information related to security posture.  Table XX summarizes the functions that are measured, and how this document recommends they be allocated to PCRs.  It's important to note that each PCR may contain results from dozens (or even thousands) of individual measurements.
+The TCG PC Client Platform Firmware Profile Specification {{PC-Client-BIOS-TPM-2.0}} gives considerable detail on what is to be 
+measured during the boot phase of a platform boot using a UEFI BOIS (www.uefi.org), but the goal is simply to measure every bit of 
+code executed in the process of starting the device, along with any configuration information related to security posture, leaving 
+no gap for unmeasured code to subvert the chain.  
+
+For platforms using a UEFI BIOS, {{PC-Client-BIOS-TPM-2.0}} gives detailed normative requirements for PCR usage.  But for other 
+platform architectures, Table xx gives guidance for PCR assignment that generalizes the specific 
+details of {{PC-Client-BIOS-TPM-2.0}}.
+
+By convention, most PCRs are allocated in pairs, which the even-numbered PCR used to measure executable code, and 
+the odd-numbered PCR used to measure whatever data and configuration are associated with that code.  It is important 
+to note that each PCR may contain results from dozens (or even thousands) of individual measurements.
+
 
 ~~~
 +------------------------------------------------------------------+
 |                                            |   Allocated PCR #   |
 | Function                                   | Code | Configuration|
 --------------------------------------------------------------------
-| BIOS Static Root of Trust, plus embedded   |  0   |    1         |
-| Option ROMs and drivers                    |      |              |
+| Firmware Static Root of Trust, i.e.,       |  0   |    1         |
+| initial boot firmware and drivers          |      |              |
 --------------------------------------------------------------------
-| Pluggable Option ROMs to initialize and    |  2   |    3         |
-| configure add-in devices                   |      |              |
+| Drivers and initialization for optional    |  2   |    3         |
+| or add-in devices                          |      |              |
 --------------------------------------------------------------------
-| Boot Manager code and configuration (UEFI  |  4   |    5         |
-| uses a separate module to implement        |      |              |
-| policies for selecting among a variety of  |      |              |
-| potential boot devices).  This PCR records |      |              |
-| boot attempts, and identifies what         |      |              |
-| resources were used to boot the OS.        |      |              |
+| OS Loader code and configuration, i.e.,    |  4   |    5         |
+| the code launched by firmware to load an   |      |              |
+| operating system kernel. These PCRs record |      |              |
+| each boot attempt, and an identifier for   |      |              |
+| where the loader was found                 |      |              |
 --------------------------------------------------------------------
 | Vendor Specific Measurements during boot   |  6   |    6         |
 --------------------------------------------------------------------
@@ -538,14 +554,52 @@ The TCG PC Client Platform Firmware Profile Specification {{PC-Client-BIOS-TPM-2
 | and configuration used to validate the OS  |      |              |
 | loader                                     |      |              |
 --------------------------------------------------------------------
-| OS Loader (e.g GRUB2 for Linux)            |  8   |    9         |
+| Measurements made by the OS Loader         |  8   |    9         |
+| (e.g GRUB2 for Linux)                      |      |              |
 --------------------------------------------------------------------
-| Reserved for OS (e.g. Linux IMA)           |  10  |    10        |
+| Measurements made by OS (e.g. Linux IMA)   |  10  |    10        |
 +------------------------------------------------------------------+
 ~~~
 {: #Attested-Objects title='Attested Objects' artwork-align="left"}
 
+Notes on PCR Allocations
 
+It is important to recognize that PCR[0] is critical.  The first measurement into PCR[0] taken by the Root of Trust for 
+Measurement, is critical to 
+establishing the chain of trust for all subsequent measurements.  If the PCR[0] measurement cannot be trusted, the 
+validity of the entire chain is put into question.
+
+Distinctions Between PCR[0], PCR[2], PCR[4] and PCR[8]
+
+* PCR[0] typically represents a consistent view of the Host Platform between boot cycles, allowing Attestation and 
+Sealed Storage policies to be defined using the less changeable components of the transitive trust chain. This PCR 
+typically provides a consistent view of the platform regardless of user selected options.
+
+* PCR[2] is intended to represent a “user configurable" environment where the user has the ability to alter the 
+components that are measured into PCR[2]. This is typically done by adding adapter cards, etc., into user-accessible 
+PCI or other slots.  In UEFI systems these devices may be configured by Option ROMsm easured into PCR[2] and 
+executed by the BIOS.
+
+* PCR[4] is intended to represent the software that manages the transition between the platform’s Pre-Operating System 
+Start and the state of a system with the Operating System present.  This PCR, along with PCR[5], identifies the initial 
+operating system loader (e.g. GRUB for Linux)
+
+* PCR[8] is used by the OS loader to record measurements of the various components of the operating system.
+
+Although the TCG PC Client document specifies the use of the first eight PCRs very carefully to ensure interoperability 
+among multiple 
+UEFI BIOS vendors, it should be noted that embedded software vendors may have considerably more flexibility.  Verifiers 
+typically need to know which log entries are consequential and which are not (possibly controlled by local policies) but 
+the verifier may not need to know what each log entry means or why it was assigned to a particular PCR.   Designers must
+recognize that some PCRs may cover log entries that a particular verifier considers critical and other log entries that
+are not considered important, so differing PCR values may not on their own constitute a check for authenticity.
+
+Designers may allocate particular events to specific PCRs in order to achieve a particular objective with Local 
+Attestation, i.e., allowing a procedure to execute only if a given PCR is in a given state.  It may also be important 
+to designers to consider whether streaming notification of PCR updates is required (see ID Rats Streaming).  Specific 
+log entries can only be validated if the verifier receives every log entry affecting the relevant PCR, so (for example) 
+a designer might want to separate rare, high-value events such as configuration changes, from high-volume, routine 
+measurements such as IMA logs.
 
 ## RIV Keying
 
