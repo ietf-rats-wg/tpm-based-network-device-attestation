@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-rats-tpm-based-network-device-attest-03
+docname: draft-ietf-rats-tpm-based-network-device-attest-04
 cat: info
 pi:
   toc: 'yes'
