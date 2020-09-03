@@ -50,6 +50,10 @@ author:
 ref: {}
 normative:
   RFC8572:
+  RFC8446:
+  RFC4253:
+  RFC7950:
+  RFC6241:
   I-D.ietf-rats-yang-tpm-charra: rats-charra
   I-D.birkholz-yang-swid:
   I-D.ietf-sacm-coswid:
@@ -60,26 +64,6 @@ normative:
     - ins: M. Seaman
       org: IEEE Computer Society
     date: 2018-08
-informative:
-  RFC6813:
-  RFC8446:
-  RFC3748:
-  RFC7950:
-  RFC6241:
-  I-D.ietf-rats-architecture: rats-arch
-  I-D.birkholz-rats-reference-interaction-model:
-  I-D.richardson-rats-usecases:
-  I-D.birkholz-rats-tuda:
-  I-D.voit-rats-trusted-path-routing:
-  I-D.birkholz-rats-network-device-subscription
-  I-D.ietf-rats-eat:
-  TPM:
-    target: https://www.iso.org/standard/66510.html
-    title: 'ISO/IEC 11889-1:2015 Information technology — Trusted 
-      platform module library — Part 1: Architecture'
-    author:
-    - org: ISO/IEC JTC 1 Information technology
-    date: 2015-08
   TAP:
     target: https://trustedcomputinggroup.org/resource/tcg-tap-information-model/
     title: 'TCG Trusted Attestation Protocol (TAP) Information Model for TPM
@@ -87,12 +71,6 @@ informative:
     author:
     - org: Trusted Computing Group
     date: 2018-10
-  NIST-SP-800-155:
-    target: https://csrc.nist.gov/csrc/media/publications/sp/800-155/draft/documents/draft-sp800-155_dec2011.pdf
-    title: BIOS Integrity Measurement Guidelines (Draft)
-    author:
-    - org: National Institute for Standards and Technology
-    date: 2011-12
   Canonical-Event-Log:
     title: 'DRAFT Canonical Event Log Format Version: 1.0, Revision: .12'
     author:
@@ -112,13 +90,6 @@ informative:
     author:
     - org: Trusted Computing Group
     date: 2012-02
-  EFI-TPM:
-    target: https://trustedcomputinggroup.org/resource/tcg-efi-platform-specification/
-    title: TCG EFI Platform Specification for TPM Family 1.1 or 1.2, Specification
-      Version 1.22, Revision 15
-    author:
-    - org: Trusted Computing Group
-    date: 2014-01
   RIM:
     title: 'DRAFT: TCG Reference Integrity Manifest Information Model'
     target: https://trustedcomputinggroup.org/wp-content/uploads/TCG_RIM_Model_v1-r13_2feb20.pdf
@@ -137,13 +108,6 @@ informative:
     author:
     - org: Trusted Computing Group
     date: 2018-10
-  Platform-Certificates:
-    target: https://trustedcomputinggroup.org/resource/tcg-platform-attribute-credential-profile/
-    title: 'TCG Platform Attribute Credential Profile, Specification Version
-      1.0, Revision 16'
-    author:
-    - org: Trusted Computing Group
-    date: 2018-01
   Platform-ID-TPM-1.2:
     target: https://trustedcomputinggroup.org/resource/tpm-keys-for-platform-identity-for-tpm-1-2-2/
     title: TPM Keys for Platform Identity for TPM 1.2, Specification Version 1.0,
@@ -151,12 +115,65 @@ informative:
     author:
     - org: Trusted Computing Group
     date: 2015-08
+  SWID:
+    target: https://www.iso.org/standard/65666.html
+    title: 'Information Technology Software Asset Management Part 2: Software Identification
+      Tag, ISO/IEC 19770-2'
+    author:
+    - org: The International Organization for Standardization/International Electrotechnical
+        Commission
+    date: 2015-10
+informative:
+  RFC6813:
+  RFC3748:
+  I-D.ietf-rats-architecture: rats-arch
+  I-D.birkholz-rats-reference-interaction-model:
+  I-D.richardson-rats-usecases:
+  I-D.birkholz-rats-tuda:
+  I-D.voit-rats-trusted-path-routing:
+  I-D.birkholz-rats-network-device-subscription
+  I-D.ietf-rats-eat:
+  TPM:
+    target: https://www.iso.org/standard/66510.html
+    title: 'ISO/IEC 11889-1:2015 Information technology — Trusted 
+      platform module library — Part 1: Architecture'
+    author:
+    - org: ISO/IEC JTC 1 Information technology
+    date: 2015-08
+  NIST-SP-800-155:
+    target: https://csrc.nist.gov/csrc/media/publications/sp/800-155/draft/documents/draft-sp800-155_dec2011.pdf
+    title: BIOS Integrity Measurement Guidelines (Draft)
+    author:
+    - org: National Institute for Standards and Technology
+    date: 2011-12
+  EFI-TPM:
+    target: https://trustedcomputinggroup.org/resource/tcg-efi-platform-specification/
+    title: TCG EFI Platform Specification for TPM Family 1.1 or 1.2, Specification
+      Version 1.22, Revision 15
+    author:
+    - org: Trusted Computing Group
+    date: 2014-01
+  Platform-Certificates:
+    target: https://trustedcomputinggroup.org/resource/tcg-platform-attribute-credential-profile/
+    title: 'TCG Platform Attribute Credential Profile, Specification Version
+      1.0, Revision 16'
+    author:
+    - org: Trusted Computing Group
+    date: 2018-01
   Provisioning-TPM-2.0:
     target: https://trustedcomputinggroup.org/wp-content/uploads/TCG-TPM-v2.0-Provisioning-Guidance-Published-v1r1.pdf
     title: TCG TPM v2.0 Provisioning Guidance, Version 1.0, Revision 1.0
     author:
     - org: Trusted Computing Group
     date: 2015-03
+
+  Attest-MIB:
+    target: https://trustedcomputinggroup.org/wp-content/uploads/TCG_SNMP_MIB_for_TPM-Based_Attestation_v0.8r2_PUBLIC_REVIEW.pdf
+    title: SNMP MIB for TPM-Based Attestation, Version 0.8Revision 0.02
+    author:
+    - org: Trusted Computing Group
+    date: 2018-05
+
   IEEE-802.1x:
     title: 802.1X-2020 - IEEE Standard for Local and Metropolitan Area Networks--Port-Based Network Access Control
     target: https://standards.ieee.org/standard/802_1X-2020.html
@@ -213,19 +230,10 @@ informative:
     date: 2018-01
   NIST-IR-8060:
     target: https://nvlpubs.nist.gov/nistpubs/ir/2016/NIST.IR.8060.pdf
-    title: Guidelines for the Creation of Interoperable Software Identification (SWID)
-      Tags
+    title: Guidelines for the Creation of Interoperable Software Identification (SWID) Tags
     author:
     - org: National Institute for Standards and Technology
     date: 2016-04
-  SWID:
-    target: https://www.iso.org/standard/65666.html
-    title: 'Information Technology Software Asset Management Part 2: Software Identification
-      Tag, ISO/IEC 19770-2'
-    author:
-    - org: The International Organization for Standardization/International Electrotechnical
-        Commission
-    date: 2015-10
   AIK-Enrollment:
     target: https://trustedcomputinggroup.org/resource/tcg-infrastructure-working-group-a-cmc-profile-for-aik-certificate-enrollment/
     title: TCG Infrastructure Working Group - A CMC Profile for AIK Certificate Enrollment
@@ -234,6 +242,11 @@ informative:
     - org: Trusted Computing Group
     date: 2011-03
 
+  SWID-Gen:
+    target: https://github.com/Labs64/swid-maven-plugin
+    title: SoftWare IDentification (SWID) Tags Generator (Maven Plugin)
+    author:
+    - org: Labs64, Munich, Germany
 --- abstract
 
 This document describes a workflow for remote attestation of the integrity of firmware and software
@@ -250,7 +263,7 @@ been configured with authorized software, all as part of a trusted supply chain,
 
 A generic architecture for remote attestation has been defined in {{I-D.ietf-rats-architecture}}.  Additionally, the use cases for remotely attesting networking devices are discussed within Section 6 of {{I-D.richardson-rats-usecases}}.  However, these documents do not provide sufficient guidance for network equipment vendors and operators to design, build, and deploy interoperable platforms.
 
-The intent of this document is to provide such guidance. It does this by outlining the Remote Integrity Verification (RIV) problem, and then identifies elements that are necessary to get the complete, scalable attestation procedure working with commercial networking products such as routers, switches and firewalls.   An underlying assumption will be the availability within the device of a Trusted Platform Module {{TPM}} compliant cryptoprocessor to enable the remote trustworthy assessment of the device's software and hardware.
+The intent of this document is to provide such guidance. It does this by outlining the Remote Integrity Verification (RIV) problem, and then identifies elements that are necessary to get the complete, scalable attestation procedure working with commercial networking products such as routers, switches and firewalls.   An underlying assumption will be the availability within the device of a Trusted Platform Module {{TPM}} compliant cryptoprocessor to enable the trustworthy remote assessment of the device's software and hardware.
 
 ## Terminology
 
@@ -292,13 +305,13 @@ by other means (e.g., by Entity Attestation Tokens {{I-D.ietf-rats-eat}}).
 
 The remainder of this document is organized into several sections:
 
-* The remainder of this section covers goals and requirements, plus a top-level description of RIV
+* The remainder of this section covers goals and requirements, plus a top-level description of RIV.
 
-* The Solution Overview section outlines how RIV works
+* The Solution Overview section outlines how RIV works.
 
 * The Standards Components section links components of RIV to normative standards.
 
-* Privacy and Security shows how specific features of RIV contribute to the trustworthiness of the Attestation Result
+* Privacy and Security shows how specific features of RIV contribute to the trustworthiness of the Attestation Result.
 
 * Supporting material is in an appendix at the end.
 
@@ -318,7 +331,7 @@ As a part of a trusted supply chain, the RIV attestation workflow outlined in th
 
 * Software Inventory - A key goal is to identify the software release(s) installed
   on the attesting device, and to provide evidence that the software stored within hasn't
-  been altered
+  been altered.
 
 * Verifiability - Verification of software and configuration of the device shows
   that the software that was authorized for installation by the administrator has actually been launched.
@@ -334,12 +347,13 @@ Attestation requires two interlocking services between the Attester network devi
   attachment to their network are those that were installed, and that they continue to
   be present in their network. As part of the mechanism for Platform Identity,
   cryptographic proof of the identity of the manufacturer is also provided.
+
 * Software Measurement is the mechanism that reports the state of mutable software components
   on the device, and can assure network managers that they have known, authentic
   software configured to run in their network.
 
 Using these two interlocking services, RIV provides a procedure that assures a network operator that the equipment in
-their network can be reliably identified, and that untampered software of
+their network can be reliably identified, and that authentic software of
 a known version is installed on each endpoint. Equipment in the network includes
 devices that make up the network itself, such as routers, switches and firewalls.
 
@@ -348,7 +362,7 @@ RIV includes several major processes:
 
 1. Creation of Evidence is the process whereby an Attester generates cryptographic
 proof (Evidence) of claims about platform properties. In particular, the
-platform identity and its software configuration are both of critical importance
+platform identity and its software configuration are both of critical importance.
 
 2. Platform Identification refers to the mechanism assuring the
 Relying Party (ultimately, a network administrator) of the identity of devices that make up their network,
@@ -379,7 +393,8 @@ integrity and authenticity, and, in some use cases, may also require confidentia
   of the connected device.
 
 All implementations supporting this RIV specification require the support of the following three technologies:
-1. Identity: Platform identity can be based on IEEE 802.1AR Device Identity (DevID) {{IEEE-802-1AR}},
+
+1. Identity: Platform identity MUST be based on IEEE 802.1AR Device Identity (DevID) {{IEEE-802-1AR}},
    coupled with careful supply-chain management by the manufacturer.  The
    DevID certificate contains a statement by the manufacturer that establishes
    the identity of the device as it left the factory.  Some applications with
@@ -394,11 +409,11 @@ All implementations supporting this RIV specification require the support of the
    unbroken chain from a boot-time root of trust through all layers of software needed to bring the device to an 
    operational state, in which each stage measures components of the next stage, updates the attestation log, and 
    extends hashes into a PCR.  The TPM can then report the hashes of all the measured hashes as a signed 
-   Quote (see {{TPM}} for many more details).
+   Quote (see {{Using a TPM for Attestation}} for an overview of TPM operation, or {{TPM}} for many more details).
 
 3. Reference Integrity Measurements must be conveyed from the Endorser (the entity accepted as the software authority,
 often the manufacturer for embedded systems) to the system in which verification
-will take place
+will take place.
 
 ## Solution Requirements
 
@@ -533,7 +548,7 @@ In general, PCRs are organized to independently attest three classes of object:
 
 * Configuration - Many devices offer numerous options controlled by non-volatile configuration variables which can impact the device's security posture.  These settings may have vendor defaults, but often can be changed by administrators, who may want to verify via attestation that the settings they intend are still in place.
 
-* Credentials - Administrators may wish to verify via attestation that keys (and other credentials) outside the Root of Trust have not been subject to unauthorized tampering.  (By definition, keys inside the root of trust can't be verified independently)
+* Credentials - Administrators may wish to verify via attestation that keys (and other credentials) outside the Root of Trust have not been subject to unauthorized tampering.  (By definition, keys inside the root of trust can't be verified independently).
 
 The TCG PC Client Platform Firmware Profile Specification {{PC-Client-BIOS-TPM-2.0}} gives considerable detail on what is to be 
 measured during the boot phase of a platform boot using a UEFI BOIS (www.uefi.org), but the goal is simply to measure every bit of 
@@ -646,7 +661,7 @@ device that provided it, by examining the corresponding AK certificate.
 
 * Network devices that are expected to use secure zero touch provisioning as
   specified in {{RFC8572}})
-  must be shipped by the manufacturer with pre-provisioned keys (Initial DevID and AK,
+  MUST be shipped by the manufacturer with pre-provisioned keys (Initial DevID and AK,
   called IDevID and IAK).  Inclusion of an IDevID and IAK by a vendor does not
   preclude a mechanism whereby an Administrator can define Local Identity and
   Attestation Keys (LDevID and LAK) if desired.
@@ -714,19 +729,19 @@ and optionally RIMs.
 
 
 
-The following standards components may be used:
+To achieve interoperability, the following standards components SHOULD be used:
 
 1. TPM Keys MUST be configured according to {{Platform-DevID-TPM-2.0}}, {{PC-Client-BIOS-TPM-1.2}}, or {{Platform-ID-TPM-1.2}}.
 
-2. For platforms using UEFI and Linux, measurements of firmware and bootable modules MAY be taken according to TCG PC Client {{PC-Client-BIOS-TPM-2.0}} and Linux IMA {{IMA}}
+2. For platforms using UEFI and Linux, measurements of firmware and bootable modules SHOULD be taken according to TCG PC Client {{PC-Client-BIOS-TPM-2.0}} and Linux IMA {{IMA}}
 
 3. Device Identity MUST be managed as specified in IEEE 802.1AR Device Identity certificates {{IEEE-802-1AR}}, with keys protected by TPMs.
 
-4. Attestation logs SHOULD be formatted according to the Canonical Event Log format {{Canonical-Event-Log}}, although other specialized formats may be used.
+4. Attestation logs SHOULD be formatted according to the Canonical Event Log format {{Canonical-Event-Log}}, although other specialized formats may be used.  UEFI-based systems MAY use the TCG UEFI BIOS event log {{EFI-TPM}}).
 
 5. Quotes are retrieved from the TPM according to the TCG TAP Information Model {{TAP}}.  While the TAP IM gives a protocol-independent description of the data elements involved, it's important to note that quotes from the TPM are signed inside the TPM, so MUST be retrieved in a way that does not invalidate the signature, as specified in {{I-D.ietf-rats-yang-tpm-charra}}, to preserve the trust model.  (See {{security-cons}} Security Considerations).
 
-6. Reference Integrity Measurements MAY be encoded as CoSWID tags, as defined in
+6. Reference Integrity Measurements SHOULD be encoded as CoSWID tags, as defined in
   the TCG RIM document {{RIM}}, compatible with NIST IR 8060 {{NIST-IR-8060}} and the IETF CoSWID draft {{I-D.ietf-sacm-coswid}}.  See {{RIM-section}}.
 
 
@@ -749,7 +764,7 @@ This document makes the following simplifying assumptions to reduce complexity:
   for Storage and Root of Trust for Reporting (as defined in {{SP800-155}}) that are
   capable of conforming to the TCG Trusted Attestation Protocol (TAP) Information Model {{TAP}}.
 
-* The authorized software supplier MUST ship Reference Integrity Measurements (i.e., known-good measurements)
+* The authorized software supplier MUST make available Reference Integrity Measurements (i.e., known-good measurements)
   in the form of signed CoSWID tags {{I-D.ietf-sacm-coswid}}, {{SWID}},
   as described in TCG Reference Integrity Measurement Manifest Information Model {{RIM}}.
 
@@ -814,10 +829,11 @@ There are multiple event log formats which may be supported as viable formats of
 * IMA Event log file exports {{IMA}}
 
 * TCG UEFI BIOS event log (TCG EFI Platform Specification for TPM Family 1.1 or
-  1.2, Section 7 {{EFI-TPM}})
+  1.2, Section 7) {{EFI-TPM}})
 
 * TCG Canonical Event Log {{Canonical-Event-Log}}
 
+Devices which use UEFI BIOS and Linux SHOULD use TCG Canonical Event Log {{Canonical-Event-Log}} and TCG UEFI BIOS event log {{EFI-TPM}})
 
 # Standards Components
 
@@ -825,7 +841,7 @@ There are multiple event log formats which may be supported as viable formats of
 ## Prerequisites for RIV
 
 The Reference Interaction Model for Challenge-Response-based Remote Attestation
-is based on the standard roles defined in {{I-D.ietf-rats-architecture}}.  However additional prerequisites must be established to allow for interoperable RIV use case implementations.  These prerequisites are intended to provide sufficient context information so that the Verifier can acquire and evaluate Attester measurements.
+is based on the standard roles defined in {{I-D.ietf-rats-architecture}}.  However additional prerequisites have been established to allow for interoperable RIV use case implementations.  These prerequisites are intended to provide sufficient context information so that the Verifier can acquire and evaluate Attester measurements.
 
 ### Unique Device Identity
 
@@ -844,9 +860,9 @@ The Attester's TPM Keys MUST be associated with the DevID on the Verifier (see {
 (Editor's Note -- terminology in this section must be brought back into line with the RATS Architecture definitions; how do well
 separate Policy as in RIM, vs Policy as in "what to do with non-black-and-white measurements")
 
-The Verifier must obtain the Appraisal Policy for Evidence.  This policy may be in the form of reference measurements (e.g., Known Good Values, CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM.
+The Verifier must obtain trustworthy Endorsements in the form of reference measurements (e.g., Known Good Values, CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM using Attestation Policies chosen by the administrator or owner of the device.
 
-This document does not specify the format or contents for the Appraisal Policy for Evidence, but acquiring this policy may happen in one of two ways:
+This document does not specify the format or contents for the Appraisal Policy for Evidence, but acquiring Endorsements may happen in one of two ways:
 
 1. a Verifier obtains reference measurements directly from a Verifier Owner (i.e., a Device Configuration Authority) chosen by the Verifier administrator.
 
@@ -866,7 +882,7 @@ This document does not specify the format or contents for the Appraisal Policy f
 ~~~~
 {: #Appraisal-Prerequisites title='Appraisal Policy for Evidence Prerequisites' artwork-align="left"}
 
-In either case the Appraisal Policy for Evidence must be generated, acquired and delivered in a secure way.  This includes reference measurements of:
+In either case the Endorsements must be generated, acquired and delivered in a secure way.  This includes reference measurements of:
 
 * firmware and bootable modules taken according to TCG PC Client {{PC-Client-BIOS-TPM-2.0}} and Linux IMA {{IMA}}, and
 
@@ -904,15 +920,16 @@ evidenceGeneration(nonce, PcrSelection, collectedClaims)          |
 ~~~~
 {: #IETF-Attestation-Information-Flow title='IETF Attestation Information Flow' artwork-align="left"}
 
-* time(VG): One or more Attesting Network Device PCRs are extended with measurements.
+* Step 1 (time(VG)): One or more Attesting Network Device PCRs are extended with measurements.  RIV provides no direct link between 
+the time at which the event takes place and the time that it's attested, although streaming attestation as in {{I-D.birkholz-rats-network-device-subscription}} could.
 
-* time(NS): The Verifier generates a unique nonce ("number used once"), and makes a request attestation data for one or more PCRs from an Attester.  This can be accomplished via a YANG {{RFC7950}} interface that implements the TCG TAP model (e.g., YANG Module for Basic Challenge-Response-based Remote Attestation Procedures {{I-D.ietf-rats-yang-tpm-charra}}).
+* Step 2 (time(NS)): The Verifier generates a unique nonce ("number used once"), and makes a request attestation data for one or more PCRs from an Attester.  For interoperability, this MUST be accomplished via a YANG {{RFC7950}} interface that implements the TCG TAP model (e.g., YANG Module for Basic Challenge-Response-based Remote Attestation Procedures {{I-D.ietf-rats-yang-tpm-charra}}).
 
-* time(EG): On the Attester, measured values are retrieved from the Attester's TPM. This requested PCR evidence is signed by the Attestation Identity Key (AIK) associated with the DevID.  Quotes are retrieved according to TCG TAP Information Model {{TAP}}.  While the TAP IM gives a protocol-independent description of the data elements involved, it's important to note that quotes from the TPM are signed inside the TPM, so must be retrieved in a way that does not invalidate the signature, as specified in {{I-D.ietf-rats-yang-tpm-charra}}, to preserve the trust model.  (See {{security-cons}} Security Considerations).  At the same time, the Attester collects log evidence showing what values have been extended into that PCR.
+* Step 3 (time(EG)): On the Attester, measured values are retrieved from the Attester's TPM. This requested PCR evidence is signed by the Attestation Identity Key (AIK) associated with the DevID.  Quotes are retrieved according to TCG TAP Information Model {{TAP}}.  While the TAP IM gives a protocol-independent description of the data elements involved, it's important to note that quotes from the TPM are signed inside the TPM, so must be retrieved in a way that does not invalidate the signature, as specified in {{I-D.ietf-rats-yang-tpm-charra}}, to preserve the trust model.  (See {{security-cons}} Security Considerations).  At the same time, the Attester collects log evidence showing what values have been extended into that PCR.
 
-* Collected Evidence is passed from the Attester to the Verifier
+* Step 4: Collected Evidence is passed from the Attester to the Verifier
 
-* time(RG,RA): The Verifier reviews the Evidence and takes action as needed.  As the Relying Party and Verifier are assumed co-resident, this can happen in one step.
+* Step 5 (time(RG,RA)): The Verifier reviews the Evidence and takes action as needed.  As the Relying Party and Verifier are assumed co-resident, this can happen in one step.
 
   * If the signed PCR values do not match the set of log entries which have extended a particular PCR, the device should not be trusted.
   
@@ -921,8 +938,10 @@ evidenceGeneration(nonce, PcrSelection, collectedClaims)          |
   * If the set of log entries are not seen as acceptable by the Appraisal Policy for Evidence, the device should not be trusted.
 
   * If the AIK signature is not correct, or freshness such as that provided by the nonce is not included in the response, the device should not be trusted.
+  
+  * If time(RG)-time(NS) is greater than the threshold in the Appraisal Policy
+  for Evidence, the Evidence is considered stale and not trusted.
 
-* time(RX): At some point after the verification of Evidence, the Attester can no longer be considered Attested as trustworthy.
 
 ### Transport and Encoding
 
@@ -936,10 +955,12 @@ Network Management systems may retrieve signed PCR based Evidence as shown in {{
 
 Retrieval of Log Evidence will be via log interfaces on the network device.  (For example, see {{I-D.ietf-rats-yang-tpm-charra}}).
 
+\[Editors Note: can we designate any combination of the above as a "SHOULD"?]
+
 {: #peer-to-peer}
 ## Centralized vs Peer-to-Peer
 
-{{IETF-Attestation-Information-Flow}} above assumes that the Verifier is implicitly trusted, while the Attesting device is not.  In a Peer-to-Peer application such as two routers negotiating a trust relationship {{I-D.voit-rats-trusted-path-routing}}, the two peers can each ask the other to prove software integrity.  In this application, the information flow is the same, but each side plays a role both as an Attester and a Verifier.  Each device issues a challenge, and each device responds to the other's challenge, as shown in {{Peer-to-peer-Information-Flow}}.  Peer-to-peer challenges, particularly if used to establish a trust relationship between routers, require devices to carry their own signed reference measurements (RIMs) so that each device has everything needed for attestation, without having to resort to a central authority.
+{{IETF-Attestation-Information-Flow}} above assumes that the Verifier is implicitly trusted, while the Attesting device is not.  In a Peer-to-Peer application such as two routers negotiating a trust relationship {{I-D.voit-rats-trusted-path-routing}}, the two peers can each ask the other to prove software integrity.  In this application, the information flow is the same, but each side plays a role both as an Attester and a Verifier.  Each device issues a challenge, and each device responds to the other's challenge, as shown in {{Peer-to-peer-Information-Flow}}.  Peer-to-peer challenges, particularly if used to establish a trust relationship between routers, require devices to carry their own signed reference measurements (RIMs).  Devices may also have to carry Appraisal Policy for Evidence for each possible peer device so that each device has everything needed for attestation, without having to resort to a central authority.
 
 
 ~~~~
@@ -973,7 +994,7 @@ Retrieval of Log Evidence will be via log interfaces on the network device.  (Fo
 ~~~~
 {: #Peer-to-peer-Information-Flow title='Peer-to-Peer Attestation Information Flow' artwork-align="left"}
 
-In this application, each device may need to be equipped with signed RIMs to act as an Attester, and also a selection of trusted x.509 root certificates to allow the device to act as a Verifier.   An existing link layer protocol such as 802.1x {{IEEE-802.1x}} or 802.1AE {{IEEE-802.1ae}}, with Evidence being enclosed over a variant of EAP {{RFC3748}} or LLDP {{LLDP}} are suitable methods for such an exchange.
+In this application, each device may need to be equipped with signed RIMs to act as an Attester, and also an Appraisal Policy for Evidence and a selection of trusted X.509 root certificates, to allow the device to act as a Verifier.   An existing link layer protocol such as 802.1x {{IEEE-802.1x}} or 802.1AE {{IEEE-802.1ae}}, with Evidence being enclosed over a variant of EAP {{RFC3748}} or LLDP {{LLDP}} are suitable methods for such an exchange.
 
 
 
@@ -1006,27 +1027,27 @@ agents of the enterprise.  As such, privacy is a fundamental concern for those d
 GDPR, California CCPA, and many other privacy regulations.  The enterprise should implement
 and enforce their duty of care.
 
-See {{NetEq}} for more context on privacy in networking devices
+See {{NetEq}} for more context on privacy in networking devices.
 
 {: #security-cons}
 # Security Considerations
 
-Attestation results from the RIV procedure are subject to a number of attacks:
+Attestation Results from the RIV procedure are subject to a number of attacks:
 
-* Keys may be compromised
-* A counterfeit device may attempt to impersonate (spoof) a known authentic device
+* Keys may be compromised.
+* A counterfeit device may attempt to impersonate (spoof) a known authentic device.
 * Man-in-the-middle attacks may be used by a counterfeit device to attempt to deliver
-responses that originate in an actual authentic device
-* Replay attacks may be attempted by a compromised device
+responses that originate in an actual authentic device.
+* Replay attacks may be attempted by a compromised device.
 
 ## Keys Used in RIV
 Trustworthiness of RIV attestation depends strongly on the validity of keys used for identity
 and attestation reports.  RIV takes full advantage of TPM capabilities to ensure that results can be trusted.
 
-Two sets of keys are relevant to RIV attestation
+Two sets of keys are relevant to RIV attestation:
 
 * A DevID key is used to certify the identity of the device in which the TPM is installed.
-* An Attestation Key (AK) key signs attestation reports, (called 'quotes' in TCG documents),
+* An Attestation Key (AK) key signs attestation reports (called 'quotes' in TCG documents),
 used to provide evidence for integrity of the software on the device.
 
 TPM practices usually require that these keys be different, as a way of ensuring that a general-purpose
@@ -1041,42 +1062,43 @@ exposed, and cannot be extracted (See {{Platform-DevID-TPM-2.0}}).
 Keeping keys safe is just part of attestation security; knowing which keys are bound
 to the device in question is just as important.
 
-While there are many ways to manage keys in a TPM (See {{Platform-DevID-TPM-2.0}}), RIV includes
+While there are many ways to manage keys in a TPM (see {{Platform-DevID-TPM-2.0}}), RIV includes
 support for "zero touch" provisioning (also known as zero-touch onboarding) of fielded
 devices (e.g., Secure ZTP, {{RFC8572}}), where keys which have predictable trust properties are
 provisioned by the device vendor.
 
-Device identity in RIV is based on IEEE 802.1AR Device Identity (DevID). This specification provides several elements
+Device identity in RIV is based on IEEE 802.1AR Device Identity (DevID). This specification provides several elements:
 
-* A DevID requires a unique key pair for each device, accompanied by an x.509 certificate
+* A DevID requires a unique key pair for each device, accompanied by an X.509 certificate,
 * The private portion of the DevID key is to be stored in the device, in a manner that provides confidentiality (Section 6.2.5 {{IEEE-802-1AR}})
 
-The x.509 certificate contains several components
+The X.509 certificate contains several components:
 
-* The public part of the unique DevID key assigned to that device
+* The public part of the unique DevID key assigned to that device allows a challenge of identity.
 * An identifying string that's unique to the manufacturer of the device.  This is normally the
 serial number of the unit, which might also be printed on a label on the device.
 * The certificate must be signed by a key traceable to the manufacturer's root key.
 
 With these elements, the device's manufacturer and serial number can be identified by analyzing the
-DevID certificate plus the chain of intermediate certs leading back to the manufacturer's root
-certificate.  As is conventional in TLS connections, a nonce must be signed by the device
+DevID certificate plus the chain of intermediate certificates leading back to the manufacturer's root
+certificate.  As is conventional in TLS or SSH connections, a nonce must be signed by the device
 in response to a challenge,
 proving possession of its DevID private key.
 
-RIV uses the DevID to validate a TLS connection to the device as the attestation session begins.  Security of
-this process derives from TLS security, with the DevID providing proof that the TLS session terminates on
-the intended device. {{RFC8446}}.
+RIV uses the DevID to validate a TLS or SSH connection to the device as the attestation session begins.  Security of
+this process derives from TLS or SSH security, with the DevID providing proof that the session terminates on
+the intended device. See {{RFC8446}}, {{RFC4253}}.
 
 Evidence of software integrity is delivered in the form of a quote signed by the TPM
 itself.  Because the contents of the quote are signed inside the TPM, any external
-modification (including reformatting to a different data format) will be detected
-as tampering.
+modification (including reformatting to a different data format) after measurements have been taken will be detected
+as tampering.  An unbroken chain of trust is essential to ensuring that blocks of code that are taking
+measurements have been verified before execution (see {{RIV-Attestation-Model}}.
 
 Requiring results of attestation of the operating software to be signed by a key known only to the TPM also
 removes the need to trust the device's operating software (beyond the first measurement; see below); any
 changes to the quote, generated and signed by the TPM itself, made by malicious device software, or in
-the path back to the verifier, will invalidate the signature on the quote.
+the path back to the Verifier, will invalidate the signature on the quote.
 
 
 A critical feature of the YANG model described in {{I-D.ietf-rats-yang-tpm-charra}} is the ability to carry TPM data structures in their native format, without requiring any changes to the structures as they were signed and delivered by the TPM.  While alternate methods of conveying TPM quotes could compress out redundant information, or add an additional layer of signing using external keys, the important part is to preserve the TPM signing, so that tampering anywhere in the path between the TPM itself and the Verifier can be detected.
@@ -1085,14 +1107,14 @@ A critical feature of the YANG model described in {{I-D.ietf-rats-yang-tpm-charr
 
 Prevention of spoofing attacks against attestation systems is also important.  There are two cases to consider:
 
-* The entire device could be spoofed, that is, when the Verifier goes to verify a specific device, it might be redirected to a different device.  Use of the 802.1AR Device Identity (DevID) in the TPM ensures that the Verifier's TLS session is in fact terminating on the right device.
+* The entire device could be spoofed, that is, when the Verifier goes to verify a specific device, it might be redirected to a different device.  Use of the 802.1AR Device Identity (DevID) in the TPM ensures that the Verifier's TLS or SSH session is in fact terminating on the right device.
 
-* A compromised device could respond with a spoofed attestation result, that is, a compromised OS could return a fabricated quote.
+* A compromised device could respond with a spoofed Attestation Result, that is, a compromised OS could return a fabricated quote.
 
 Protection against spoofed quotes from a device with valid identity is a bit more complex.
 An identity key must be available to sign any kind of nonce or hash offered by the verifier,
-and consequently, could be used to sign a fabricated quote.  To block spoofed attestation
-result, the quote generated inside the TPM must be signed by
+and consequently, could be used to sign a fabricated quote.  To block a spoofed Attestation
+Result, the quote generated inside the TPM must be signed by
 a key that's different from the DevID, called an Attestation Key (AK).
 
 Given separate Attestation and DevID keys, the
@@ -1102,6 +1124,7 @@ prevent a man-in-the-middle attack (e.g., the 'Asokan Attack' {{RFC6813}}).
 This is accomplished in RIV through use of an AK certificate with the same elements as the DevID
 (i.e., same manufacturer's serial number, signed by the same manufacturer's key), but containing
 the device's unique AK public key instead of the DevID public key.  
+
 \[Editor's Note: does this require an OID that says the key is known by the CA to be an Attestation key?]
 
 These two keys and certificates are used together:
@@ -1115,14 +1138,14 @@ evidence comes from the same device.
 Replay attacks, where results of a previous attestation are submitted in response to subsequent requests,
 are usually prevented by inclusion of a nonce in the request to the TPM
 for a quote.  Each request from the Verifier includes a new random number (a nonce). The resulting
-quote signed by the TPM contains the same nonce, allowing the verifier to determine
-freshness, (i.e., that the resulting quote was generated in response to the verifier's specific request).
+quote signed by the TPM contains the same nonce, allowing the Verifier to determine
+freshness, (i.e., that the resulting quote was generated in response to the Verifier's specific request).
 Time-Based Uni-directional Attestation {{I-D.birkholz-rats-tuda}} provides an alternate mechanism
 to verify freshness without requiring a request/response cycle.
 
 ## Owner-Signed Keys
 
-Although RIV recommends that device manufacturers pre-provision devices with easily-verified DevID and AK certs,
+Although RIV recommends that device manufacturers pre-provision devices with easily verified DevID and AK certificates,
 use of those credentials is not mandatory.  IEEE 802.1AR incorporates the idea of an Initial Device ID
 (IDevID), provisioned by the manufacturer, and a Local Device ID (LDevID) provisioned by the owner of
 the device.  RIV extends that concept by defining an Initial Attestation Key (IAK) and Local Attestation
@@ -1130,13 +1153,13 @@ Key (LAK) with the same properties.
 
 Device owners can use any method to provision the Local credentials.
 
-* TCG document {{Platform-DevID-TPM-2.0}} shows how the initial Attestation
+* The TCG document {{Platform-DevID-TPM-2.0}} shows how the initial Attestation
 keys can be used to certify LDevID and LAK keys.  Use of the LDevID and LAK allows the device owner
 to use a uniform identity structure across device types from multiple manufacturers (in the same way
-that an "Asset Tag" is used by many enterprises to identify devices they own).  TCG doc
+that an "Asset Tag" is used by many enterprises to identify devices they own).  The TCG document
 {{Provisioning-TPM-2.0}} also contains guidance on provisioning identity keys in TPM 2.0.
 
-* But device owners can use any other mechanism they want to assure themselves that Local identity
+* Device owners, however, can use any other mechanism they want to assure themselves that Local identity
 certificates are inserted into the intended device, including physical inspection and programming
 in a secure location, if they prefer to avoid placing trust in the manufacturer-provided keys.
 
@@ -1153,13 +1176,13 @@ the device's serial number plate.
 In addition to trustworthy provisioning of keys, RIV depends on other trust anchors.  (See {{SP800-155}} for definitions of Roots of Trust.)
 
 * Secure identity depends on mechanisms to prevent per-device secret keys from being compromised.  The TPM
-provides this capability as a Root of Trust for Storage
+provides this capability as a Root of Trust for Storage.
 
 * Attestation depends on an unbroken chain of measurements, starting from the very first measurement.
 That first measurement is made by code called the Root of Trust for Measurement, typically done by trusted
 firmware stored in boot flash.  Mechanisms for maintaining the trustworthiness of the RTM are out of
 scope for RIV, but could include immutable firmware, signed updates, or a vendor-specific hardware
-verification technique.
+verification technique.  See {{Using a TPM for Attestation}} for background on TPM practices.
 
 * RIV assumes some level of physical defense for the device.  If a TPM that has already been programmed
 with an authentic DevID is stolen and inserted into a counterfeit device, attestation of that counterfeit
@@ -1177,11 +1200,11 @@ The validity of RIV attestation results is also influenced by procedures used to
 not subject to unexpected manipulation prior to signing.  Insider-attacks against code bases and build chains
 are particularly hard to spot.
 
-* Designers must guard against hash collision attacks.  Reference measurements often give hashes for large objects
+* Designers must guard against hash collision attacks.  Reference Integrity Measurements often give hashes for large objects
 of indeterminate size; if one of the measured objects can be replaced with an implant engineered to produce
 the same hash, RIV will be unable to detect the substitution.  TPM1.2 uses SHA-1 hashes only, which have been
 shown to be susceptible to collision attack.  TPM2.0 will produce quotes with SHA-256, which so far has resisted
-such attacks, and consequently is preferred.
+such attacks, and consequently is RECOMMENDED.
 
 # Conclusion
 
@@ -1192,12 +1215,12 @@ implementation of RIV already exist:
 * Platform identity can be based on IEEE 802.1AR Device Identity, coupled with
   careful supply-chain management by the manufacturer.
 
-* Complex supply chains can be certified using TCG Platform Certificates {{Platform-Certificates}}
+* Complex supply chains can be certified using TCG Platform Certificates {{Platform-Certificates}}.
 
 * The TCG TAP mechanism can be used to retrieve attestation evidence.  Work
   is needed on a YANG model for this protocol.
 
-* Reference Measurements must be conveyed from the software authority (e.g.,
+* Reference Integrity Measurements must be conveyed from the software authority (e.g.,
   the manufacturer) to the system in which verification will take place.  IETF
   CoSWID work forms the basis for this, but new work is needed to create an
   information model and YANG implementation.
@@ -1209,14 +1232,14 @@ This memo includes no request to IANA.
 
 # Appendix
 
-## Using a TPM for Attestation
+## Using a TPM for Attestation 
  
 The Trusted Platform Module and surrounding ecosystem provide three interlocking capabilities to enable secure collection 
 of evidence from a remote device, Platform Configuration Registers (PCRs), a Quote mechanism, and a standardized Event Log.
  
 Each TPM has at least between eight and twenty-four PCRs (depending on the profile and vendor choices), each one large 
-enough to hold one hash value (SHA-1, SHA-256, and other algorithms can 
-be used for this hashing depending on TPM version).  PCRs can’t be accessed directly from outside the chip, but the TPM 
+enough to hold one hash value (SHA-1, SHA-256, and other hash algorithms can 
+be used, depending on TPM version).  PCRs can’t be accessed directly from outside the chip, but the TPM 
 interface provides a way to “extend” a new security measurement hash into any PCR, a process by which the existing value 
 in the PCR is hashed with the new security measurement hash, and the result placed back into the same PCR.  The result 
 is a composite fingerprint of all the security measurements extended into each PCR since the system was reset.
@@ -1227,7 +1250,12 @@ The Event Log itself is protected against accidental manipulation, but it is imp
 verification process can read the security measurement hash from the log events, compute the composite value 
 and compare that to what ended up in the PCR.   If there’s a discrepancy, the logs do not provide an accurate 
 view of what was placed into the PCR.
- 
+
+In a conventional TPM Attestation environment, the first measurement must be made and extended into the TPM by trusted 
+device code (called the Root of Trust for Measurement, RTM).  That first measurement should cover the segment of 
+code that is run immediately after the RTM, which then measures the next code segment before running it, and so on, 
+forming an unbroken chain of trust.  See {{TCGRoT}} for more on Mutable vs Immutable roots of trust.
+
 The TPM provides another mechanism called a Quote that can read the current value of the PCRs and package them 
 into a data structure signed by an Attestation Key (which is private key that is known only to the TPM).
  
@@ -1238,7 +1266,29 @@ validate overall system integrity.
  
 A summary of information exchanged in obtaining quotes from TPM1.2 and TPM2.0 can be found in {{TAP}}, Section 4.
 Detailed information about PCRs and Quote data structures can be found in {{TPM1.2}} and {{TPM2.0}}.  Recommended log 
-formats include {{XX}} and {{Canonical-Event-Log}}
+formats include {{PC-Client-BIOS-TPM-2.0}} and {{Canonical-Event-Log}}
+
+## Root of Trust for Measurement
+
+The measurements needed for attestation require that the device being attested
+is equipped with a Root of Trust for Measurement, that is, some trustworthy
+mechanism that can compute the first measurement in the chain of trust required
+to attest that each stage of system startup is verified, a Root of Trust for Storage (i.e., 
+the TPM PCRs) to record the results, and a Root of Trust
+for Reporting to report the results {{TCGRoT}}, {{SP800-155}}.
+
+While there are many complex aspects of a Root of Trust, two aspects that
+are important in the case of attestation are:
+
+* The first measurement computed by the Root of Trust for Measurement, and stored
+  in the TPM's Root of Trust for Storage, is presumed to be correct.
+
+* There must not be a way to reset the Root of Trust for Storage without re-entering
+  the Root of Trust for Measurement code.
+
+The first measurement must be computed by code that is implicitly trusted; if that
+first measurement can be subverted, none of the remaining measurements can
+be trusted. (See {{NIST-SP-800-155}})
 
 
 ## Layering Model for Network Equipment Attester and Verifier
@@ -1294,14 +1344,7 @@ retrieval of Reference Measurements uses a different set of protocols.  Figure
 {: #RIV-Protocol-Stacks title='RIV Protocol Stacks' artwork-align="left"}
 
 IETF documents are captured in boxes surrounded by asterisks. TCG documents
-are shown in boxes surrounded by dots. The IETF Attestation Reference Interaction
-Diagram, Reference Integrity Manifest, TAP Information Model
-and Canonical Log Format, and both YANG modules are works in progress. Information
-Model layers describe abstract data objects that can be requested, and the
-corresponding response SNMP is still widely used, but the industry is transitioning
-to YANG, so in some cases, both will be required. TLS Authentication with
-TPM has been shown to work; SSH authentication using TPM-protected keys is
-not as easily done \[as of 2019]
+are shown in boxes surrounded by dots. 
 
 
 
@@ -1370,9 +1413,8 @@ unless otherwise noted.
 --------------------------------------------------------------------
 |  Package the SWID tags with a vendor software   | Retrieve tags  |
 |  release                                        | with           |
-|    o  A tag-generator plugin such      | {{I-D.birkholz-yang-swid}}|
-|     as https://github.com/Labs64/swid-maven-plugin               |
-|     can be used                                 |----------------|
+|    o  A tag-generator plugin such      | draft-birkholz-yang-swid|
+|     as [SWID-Gen] can be used                   |----------------|
 |                                                 | TCG PC Client  |
 |                                                 | RIM            |
 --------------------------------------------------------------------
@@ -1405,29 +1447,6 @@ unless otherwise noted.
 
 
 
-
-
-## Root of Trust for Measurement
-
-The measurements needed for attestation require that the device being attested
-is equipped with a Root of Trust for Measurement, that is, some trustworthy
-mechanism that can compute the first measurement in the chain of trust required
-to attest that each stage of system startup is verified, a Root of Trust for Storage (i.e., 
-the TPM PCRs) to record the results, and a Root of Trust
-for Reporting to report the results {{TCGRoT}}, {{SP800-155}}.
-
-While there are many complex aspects of a Root of Trust, two aspects that
-are important in the case of attestation are:
-
-* The first measurement computed by the Root of Trust for Measurement, and stored
-  in the TPM's Root of Trust for Storage, is presumed to be correct.
-
-* There must not be a way to reset the Root of Trust for Storage without re-entering
-  the Root of Trust for Measurement code.
-
-The first measurement must be computed by code that is implicitly trusted; if that
-first measurement can be subverted, none of the remaining measurements can
-be trusted. (See {{NIST-SP-800-155}})
 
 
 
