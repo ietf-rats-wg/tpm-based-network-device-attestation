@@ -131,12 +131,11 @@ informative:
   I-D.richardson-rats-usecases:
   I-D.birkholz-rats-tuda:
   I-D.voit-rats-trusted-path-routing:
-  I-D.birkholz-rats-network-device-subscription
+  I-D.birkholz-rats-network-device-subscription:
   I-D.ietf-rats-eat:
   TPM:
     target: https://www.iso.org/standard/66510.html
-    title: 'ISO/IEC 11889-1:2015 Information technology — Trusted 
-      platform module library — Part 1: Architecture'
+    title: 'ISO/IEC 11889-1:2015 Information technology — Trusted platform module library — Part 1: Architecture'
     author:
     - org: ISO/IEC JTC 1 Information technology
     date: 2015-08
@@ -409,7 +408,7 @@ All implementations supporting this RIV specification require the support of the
    unbroken chain from a boot-time root of trust through all layers of software needed to bring the device to an 
    operational state, in which each stage measures components of the next stage, updates the attestation log, and 
    extends hashes into a PCR.  The TPM can then report the hashes of all the measured hashes as a signed 
-   Quote (see {{Using a TPM for Attestation}} for an overview of TPM operation, or {{TPM}} for many more details).
+   Quote (see {{using-tpm}} for an overview of TPM operation, or {{TPM}} for many more details).
 
 3. Reference Integrity Measurements must be conveyed from the Endorser (the entity accepted as the software authority,
 often the manufacturer for embedded systems) to the system in which verification
@@ -1182,7 +1181,7 @@ provides this capability as a Root of Trust for Storage.
 That first measurement is made by code called the Root of Trust for Measurement, typically done by trusted
 firmware stored in boot flash.  Mechanisms for maintaining the trustworthiness of the RTM are out of
 scope for RIV, but could include immutable firmware, signed updates, or a vendor-specific hardware
-verification technique.  See {{Using a TPM for Attestation}} for background on TPM practices.
+verification technique.  See {{using-tpm}} for background on TPM practices.
 
 * RIV assumes some level of physical defense for the device.  If a TPM that has already been programmed
 with an authentic DevID is stolen and inserted into a counterfeit device, attestation of that counterfeit
@@ -1232,6 +1231,7 @@ This memo includes no request to IANA.
 
 # Appendix
 
+{: #using-tpm}
 ## Using a TPM for Attestation 
  
 The Trusted Platform Module and surrounding ecosystem provide three interlocking capabilities to enable secure collection 
@@ -1265,8 +1265,8 @@ Quote can then be compared to corresponding expected values in the set of Refere
 validate overall system integrity.
  
 A summary of information exchanged in obtaining quotes from TPM1.2 and TPM2.0 can be found in {{TAP}}, Section 4.
-Detailed information about PCRs and Quote data structures can be found in {{TPM1.2}} and {{TPM2.0}}.  Recommended log 
-formats include {{PC-Client-BIOS-TPM-2.0}} and {{Canonical-Event-Log}}
+Detailed information about PCRs and Quote data structures can be found in {{TPM}}.  Recommended log 
+formats include {{PC-Client-BIOS-TPM-2.0}} and {{Canonical-Event-Log}}.
 
 ## Root of Trust for Measurement
 
@@ -1362,11 +1362,13 @@ standardization is still in process.
 
 ## Implementation Notes
 
-Table 1 summarizes many of the actions needed to complete an Attestation
+{{Component-Status}} summarizes many of the actions needed to complete an Attestation
 system, with links to relevant documents.  While documents are controlled
 by several standards organizations, the implied actions required for
 implementation are all the responsibility of the manufacturer of the device,
-unless otherwise noted.
+unless otherwise noted.  It should be noted that, while the YANG model is 
+RECOMMENDED for attestation, this table identifies an optional SNMP MIB as 
+well, {{Attest-MIB}}.
 
 ~~~~
 +------------------------------------------------------------------+
