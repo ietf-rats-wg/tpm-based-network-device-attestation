@@ -133,12 +133,19 @@ informative:
   I-D.voit-rats-trusted-path-routing:
   I-D.birkholz-rats-network-device-subscription:
   I-D.ietf-rats-eat:
-  TPM:
-    target: https://www.iso.org/standard/66510.html
-    title: 'ISO/IEC 11889-1:2015 Information technology — Trusted platform module library — Part 1: Architecture'
+  
+  TPM1.2:
+    target: https://trustedcomputinggroup.org/resource/tpm-main-specification/
+    title: 'TPM Main Specification Level 2 Version 1.2, Revision 116'
     author:
-    - org: ISO/IEC JTC 1 Information technology
-    date: 2015-08
+    - org: Trusted Computing Group
+    date: 2011-03
+  TPM2.0:
+    target: https://trustedcomputinggroup.org/resource/tpm-library-specification/
+    title: 'Trusted Platform Module Library Specification, Family “2.0”, Level 00, Revision 01.59'
+    author:
+    - org: Trusted Computing Group
+    date: 2019-11
   NIST-SP-800-155:
     target: https://csrc.nist.gov/csrc/media/publications/sp/800-155/draft/documents/draft-sp800-155_dec2011.pdf
     title: BIOS Integrity Measurement Guidelines (Draft)
@@ -249,7 +256,7 @@ informative:
 --- abstract
 
 This document describes a workflow for remote attestation of the integrity of firmware and software
-installed on network devices that contain Trusted Platform Modules {{TPM}}.
+installed on network devices that contain Trusted Platform Modules {{TPM1.2}}, {{TPM2.0}}.
 
 --- middle
 
@@ -262,7 +269,7 @@ been configured with authorized software, all as part of a trusted supply chain,
 
 A generic architecture for remote attestation has been defined in {{I-D.ietf-rats-architecture}}.  Additionally, the use cases for remotely attesting networking devices are discussed within Section 6 of {{I-D.richardson-rats-usecases}}.  However, these documents do not provide sufficient guidance for network equipment vendors and operators to design, build, and deploy interoperable platforms.
 
-The intent of this document is to provide such guidance. It does this by outlining the Remote Integrity Verification (RIV) problem, and then identifies elements that are necessary to get the complete, scalable attestation procedure working with commercial networking products such as routers, switches and firewalls.   An underlying assumption will be the availability within the device of a Trusted Platform Module {{TPM}} compliant cryptoprocessor to enable the trustworthy remote assessment of the device's software and hardware.
+The intent of this document is to provide such guidance. It does this by outlining the Remote Integrity Verification (RIV) problem, and then identifies elements that are necessary to get the complete, scalable attestation procedure working with commercial networking products such as routers, switches and firewalls.   An underlying assumption will be the availability within the device of a Trusted Platform Module {{TPM1.2}}, {{TPM2.0}} compliant cryptoprocessor to enable the trustworthy remote assessment of the device's software and hardware.
 
 ## Terminology
 
@@ -371,7 +378,7 @@ and that their manufacturers are known.
 of measurements, started by a Root of Trust for Measurement,
 that normally ends when the system software is loaded.
 A measurement signifies the identity, integrity and version of each
-software component registered with an attesting device's TPM {{TPM}}, so that the
+software component registered with an attesting device's TPM {{TPM1.2}}, {{TPM2.0}}, so that the
 subsequent appraisal stage can determine if the software
 installed is authentic, up-to-date, and free of tampering.
 
@@ -408,7 +415,7 @@ All implementations supporting this RIV specification require the support of the
    unbroken chain from a boot-time root of trust through all layers of software needed to bring the device to an 
    operational state, in which each stage measures components of the next stage, updates the attestation log, and 
    extends hashes into a PCR.  The TPM can then report the hashes of all the measured hashes as a signed 
-   Quote (see {{using-tpm}} for an overview of TPM operation, or {{TPM}} for many more details).
+   Quote (see {{using-tpm}} for an overview of TPM operation, or {{TPM1.2}} and {{TPM2.0}} for many more details).
 
 3. Reference Integrity Measurements must be conveyed from the Endorser (the entity accepted as the software authority,
 often the manufacturer for embedded systems) to the system in which verification
@@ -442,7 +449,7 @@ Remote Attestation is a very general problem that could apply to most network-co
 * This document assumes network protocols that are common in networking equipment such as YANG {{RFC7950}} and NETCONF {{RFC6241}},
   but not generally used in other applications.
 
-* The approach outlined in this document mandates the use of a compliant TPM {{TPM}}.  Other
+* The approach outlined in this document mandates the use of a compliant TPM {{TPM1.2}}, {{TPM2.0}}.  Other
   roots of trust could be used with the same information flow, although they're out of
   scope for this document.
 
@@ -629,7 +636,7 @@ are not considered important, so differing PCR values may not on their own const
 Designers may allocate particular events to specific PCRs in order to achieve a particular objective with Local 
 Attestation, (e.g., allowing a procedure to execute only if a given PCR is in a given state).  It may also be important 
 to designers to consider whether streaming notification of PCR updates is required (see {{I-D.birkholz-rats-network-device-subscription}}).  Specific 
-log entries can only be validated if the verifier receives every log entry affecting the relevant PCR, so (for example) 
+log entries can only be validated if the Verifier receives every log entry affecting the relevant PCR, so (for example) 
 a designer might want to separate rare, high-value events such as configuration changes, from high-volume, routine 
 measurements such as IMA {{IMA}} logs.
 
@@ -856,21 +863,20 @@ The Attester's TPM Keys MUST be associated with the DevID on the Verifier (see {
 {: #RIM-policy}
 ### Appraisal Policy for Evidence
 
-(Editor's Note -- terminology in this section must be brought back into line with the RATS Architecture definitions; how do well
-separate Policy as in RIM, vs Policy as in "what to do with non-black-and-white measurements")
+The Verifier must obtain trustworthy Endorsements in the form of reference measurements (e.g., Known Good Values, encoded as CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM using Attestation Policies chosen by the administrator or owner of the device.
 
-The Verifier must obtain trustworthy Endorsements in the form of reference measurements (e.g., Known Good Values, CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM using Attestation Policies chosen by the administrator or owner of the device.
+This document does not specify the format or contents for the Appraisal Policy for Evidence, but Endorsements may be acquired in one of two ways:
 
-This document does not specify the format or contents for the Appraisal Policy for Evidence, but acquiring Endorsements may happen in one of two ways:
+1. a Verifier may obtain reference measurements directly from an Endorser chosen by the Verifier administrator (e.g., through a web site).
 
-1. a Verifier obtains reference measurements directly from a Verifier Owner (i.e., a Device Configuration Authority) chosen by the Verifier administrator.
+2. Signed reference measurements may be distributed by the Endorser to the Attester, as part of a software update.  From there, the reference measurement may be acquired by the Verifier.
 
-2. Signed reference measurements may be distributed by the Verifier Owner to the Attester.  From there, the reference measurement may be acquired by the Verifier.
+In either case, the Verifier Owner must select the source of trusted endorsements through the Appraisal Policy for Evidence.
 
 ~~~~
 *************         .-------------.         .-----------.
-* Verifier  *         | Attester    |         | Verifier/ |
-* Owner     *         |             |         | Relying   |
+* Endorser  *         | Attester    |         | Verifier/ |
+*           *         |             |         | Relying   |
 *(Device    *----2--->| (Network    |----2--->| Party     |
 * config    *         |  Device)    |         |(Ntwk Mgmt |
 * Authority)*         |             |         |  Station) |
@@ -932,7 +938,7 @@ the time at which the event takes place and the time that it's attested, althoug
 
   * If the signed PCR values do not match the set of log entries which have extended a particular PCR, the device should not be trusted.
   
-  * If the log entries that the verifier considers important do not match known good values, the device should not be trusted.  We note that the process of collecting and analyzing the log can be omitted if the value in the relevant PCR is already a known-good value.
+  * If the log entries that the Verifier considers important do not match known good values, the device should not be trusted.  We note that the process of collecting and analyzing the log can be omitted if the value in the relevant PCR is already a known-good value.
 
   * If the set of log entries are not seen as acceptable by the Appraisal Policy for Evidence, the device should not be trusted.
 
@@ -944,17 +950,11 @@ the time at which the event takes place and the time that it's attested, althoug
 
 ### Transport and Encoding
 
-Network Management systems may retrieve signed PCR based Evidence as shown in {{IETF-Attestation-Information-Flow}}, and can be accomplished via:
+Network Management systems may retrieve signed PCR based Evidence as shown in {{IETF-Attestation-Information-Flow}}, and can be accomplished via NETCONF or RESTCONF, with XML, JSON, or CBOR encoded Evidence.
 
-* XML, JSON, or CBOR encoded Evidence, using
-
-* RESTCONF or NETCONF transport, over a
-
-* TLS or SSH secure tunnel
+Implementations MUST use NETCONF and MAY use RESTCONF transport, over a TLS or SSH secure tunnel
 
 Retrieval of Log Evidence will be via log interfaces on the network device.  (For example, see {{I-D.ietf-rats-yang-tpm-charra}}).
-
-\[Editors Note: can we designate any combination of the above as a "SHOULD"?]
 
 {: #peer-to-peer}
 ## Centralized vs Peer-to-Peer
@@ -1111,7 +1111,7 @@ Prevention of spoofing attacks against attestation systems is also important.  T
 * A compromised device could respond with a spoofed Attestation Result, that is, a compromised OS could return a fabricated quote.
 
 Protection against spoofed quotes from a device with valid identity is a bit more complex.
-An identity key must be available to sign any kind of nonce or hash offered by the verifier,
+An identity key must be available to sign any kind of nonce or hash offered by the Verifier,
 and consequently, could be used to sign a fabricated quote.  To block a spoofed Attestation
 Result, the quote generated inside the TPM must be signed by
 a key that's different from the DevID, called an Attestation Key (AK).
@@ -1265,7 +1265,7 @@ Quote can then be compared to corresponding expected values in the set of Refere
 validate overall system integrity.
  
 A summary of information exchanged in obtaining quotes from TPM1.2 and TPM2.0 can be found in {{TAP}}, Section 4.
-Detailed information about PCRs and Quote data structures can be found in {{TPM}}.  Recommended log 
+Detailed information about PCRs and Quote data structures can be found in {{TPM1.2}}, {{TPM2.0}}.  Recommended log 
 formats include {{PC-Client-BIOS-TPM-2.0}} and {{Canonical-Event-Log}}.
 
 ## Root of Trust for Measurement
