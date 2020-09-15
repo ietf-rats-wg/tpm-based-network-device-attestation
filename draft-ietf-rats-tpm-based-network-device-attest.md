@@ -857,13 +857,13 @@ A secure Device Identity (DevID) in the form of an IEEE 802.1AR DevID certificat
 
 The Attestation Identity Key (AIK) and certificate MUST also be provisioned on the Attester according to {{Platform-DevID-TPM-2.0}}, {{PC-Client-BIOS-TPM-1.2}}, or {{Platform-ID-TPM-1.2}}.
 
-The Attester's TPM Keys MUST be associated with the DevID on the Verifier (see {{security-cons}} Security Considerations).
+The Attester's TPM Keys MUST be associated with the DevID on the Verifier (see {{Platform-DevID-TPM-2.0}} and {{security-cons}} Security Considerations, below).
 
 
 {: #RIM-policy}
 ### Appraisal Policy for Evidence
 
-The Verifier must obtain trustworthy Endorsements in the form of reference measurements (e.g., Known Good Values, encoded as CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM using Attestation Policies chosen by the administrator or owner of the device.
+The Verifier MUST obtain trustworthy Endorsements in the form of reference measurements (e.g., Known Good Values, encoded as CoSWID tags {{I-D.birkholz-yang-swid}}). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM using Attestation Policies chosen by the administrator or owner of the device.
 
 This document does not specify the format or contents for the Appraisal Policy for Evidence, but Endorsements may be acquired in one of two ways:
 
@@ -871,7 +871,7 @@ This document does not specify the format or contents for the Appraisal Policy f
 
 2. Signed reference measurements may be distributed by the Endorser to the Attester, as part of a software update.  From there, the reference measurement may be acquired by the Verifier.
 
-In either case, the Verifier Owner must select the source of trusted endorsements through the Appraisal Policy for Evidence.
+In either case, the Verifier Owner MUST select the source of trusted endorsements through the Appraisal Policy for Evidence.
 
 ~~~~
 *************         .-------------.         .-----------.
@@ -887,11 +887,7 @@ In either case, the Verifier Owner must select the source of trusted endorsement
 ~~~~
 {: #Appraisal-Prerequisites title='Appraisal Policy for Evidence Prerequisites' artwork-align="left"}
 
-In either case the Endorsements must be generated, acquired and delivered in a secure way.  This includes reference measurements of:
-
-* firmware and bootable modules taken according to TCG PC Client {{PC-Client-BIOS-TPM-2.0}} and Linux IMA {{IMA}}, and
-
-* encoded CoSWID tags signed by the device manufacturer, as defined in the TCG RIM document {{RIM}}, compatible with NIST IR 8060 {{NIST-IR-8060}} and the IETF CoSWID draft {{I-D.ietf-sacm-coswid}}.
+In either case the Endorsements must be generated, acquired and delivered in a secure way, including reference measurements of firmware and bootable modules taken according to TCG PC Client {{PC-Client-BIOS-TPM-2.0}} and Linux IMA {{IMA}}.  Endorsementa MUST be encoded as SWID or CoSWID tags, signed by the device manufacturer, as defined in the TCG RIM document {{RIM}}, compatible with NIST IR 8060 {{NIST-IR-8060}} or the IETF CoSWID draft {{I-D.ietf-sacm-coswid}}.
 
 
 ## Reference Model for Challenge-Response
@@ -934,27 +930,28 @@ the time at which the event takes place and the time that it's attested, althoug
 
 * Step 4: Collected Evidence is passed from the Attester to the Verifier
 
-* Step 5 (time(RG,RA)): The Verifier reviews the Evidence and takes action as needed.  As the Relying Party and Verifier are assumed co-resident, this can happen in one step.
+* Step 5 (time(RG,RA)): The Verifier reviews the Evidence and takes action as needed.  As the interaction between Relying Party and Verifier is out of scope for RIV, this can happen in one step.
 
-  * If the signed PCR values do not match the set of log entries which have extended a particular PCR, the device should not be trusted.
+  * If the signed PCR values do not match the set of log entries which have extended a particular PCR, the device SHOULD NOT be trusted.
   
-  * If the log entries that the Verifier considers important do not match known good values, the device should not be trusted.  We note that the process of collecting and analyzing the log can be omitted if the value in the relevant PCR is already a known-good value.
+  * If the log entries that the Verifier considers important do not match known good values, the device SHOULD NOT be trusted.  We note that the process of collecting and analyzing the log can be omitted if the value in the relevant PCR is already a known-good value.
 
-  * If the set of log entries are not seen as acceptable by the Appraisal Policy for Evidence, the device should not be trusted.
+  * If the set of log entries are not seen as acceptable by the Appraisal Policy for Evidence, the device SHOULD NOT be trusted.
 
-  * If the AIK signature is not correct, or freshness such as that provided by the nonce is not included in the response, the device should not be trusted.
+  * If the AIK signature is not correct, or freshness such as that provided by the nonce is not included in the response, the device SHOULD NOT be trusted.
   
   * If time(RG)-time(NS) is greater than the threshold in the Appraisal Policy
-  for Evidence, the Evidence is considered stale and not trusted.
+  for Evidence, the Evidence is considered stale and SHOULD NOT be trusted.
 
 
 ### Transport and Encoding
 
 Network Management systems may retrieve signed PCR based Evidence as shown in {{IETF-Attestation-Information-Flow}}, and can be accomplished via NETCONF or RESTCONF, with XML, JSON, or CBOR encoded Evidence.
 
-Implementations MUST use NETCONF and MAY use RESTCONF transport, over a TLS or SSH secure tunnel
+Implementations that use NETCONF MUST do so over a TLS or SSH secure tunnel.
+Implementations that use RESTCONF transport MAY do so over a TLS or SSH secure tunnel.
 
-Retrieval of Log Evidence will be via log interfaces on the network device.  (For example, see {{I-D.ietf-rats-yang-tpm-charra}}).
+Retrieval of Log Evidence SHOULD be via log interfaces on the network device.  (For example, see {{I-D.ietf-rats-yang-tpm-charra}}).
 
 {: #peer-to-peer}
 ## Centralized vs Peer-to-Peer
@@ -1023,7 +1020,7 @@ provides individual and peer privacy guarantees.
 
 RIV specifically addresses the collection of information from enterprise network devices by authorized 
 agents of the enterprise.  As such, privacy is a fundamental concern for those deploying this solution, given EU
-GDPR, California CCPA, and many other privacy regulations.  The enterprise should implement
+GDPR, California CCPA, and many other privacy regulations.  The enterprise SHOULD implement
 and enforce their duty of care.
 
 See {{NetEq}} for more context on privacy in networking devices.
@@ -1100,7 +1097,7 @@ changes to the quote, generated and signed by the TPM itself, made by malicious 
 the path back to the Verifier, will invalidate the signature on the quote.
 
 
-A critical feature of the YANG model described in {{I-D.ietf-rats-yang-tpm-charra}} is the ability to carry TPM data structures in their native format, without requiring any changes to the structures as they were signed and delivered by the TPM.  While alternate methods of conveying TPM quotes could compress out redundant information, or add an additional layer of signing using external keys, the important part is to preserve the TPM signing, so that tampering anywhere in the path between the TPM itself and the Verifier can be detected.
+A critical feature of the YANG model described in {{I-D.ietf-rats-yang-tpm-charra}} is the ability to carry TPM data structures in their native format, without requiring any changes to the structures as they were signed and delivered by the TPM.  While alternate methods of conveying TPM quotes could compress out redundant information, or add an additional layer of signing using external keys, the implementation MUST preserve the TPM signing, so that tampering anywhere in the path between the TPM itself and the Verifier can be detected.
 
 ## Prevention of Spoofing and Man-in-the-Middle Attacks
 
@@ -1144,10 +1141,10 @@ to verify freshness without requiring a request/response cycle.
 
 ## Owner-Signed Keys
 
-Although RIV recommends that device manufacturers pre-provision devices with easily verified DevID and AK certificates,
+Although device manufacturers MUST pre-provision devices with easily verified DevID and AK certificates,
 use of those credentials is not mandatory.  IEEE 802.1AR incorporates the idea of an Initial Device ID
 (IDevID), provisioned by the manufacturer, and a Local Device ID (LDevID) provisioned by the owner of
-the device.  RIV extends that concept by defining an Initial Attestation Key (IAK) and Local Attestation
+the device.  RIV and {{Platform-DevID-TPM-2.0}} extends that concept by defining an Initial Attestation Key (IAK) and Local Attestation
 Key (LAK) with the same properties.
 
 Device owners can use any method to provision the Local credentials.
@@ -1163,7 +1160,7 @@ certificates are inserted into the intended device, including physical inspectio
 in a secure location, if they prefer to avoid placing trust in the manufacturer-provided keys.
 
 Clearly, Local keys can't be used for secure Zero Touch provisioning; installation of the Local keys
-can only be done by some process that runs before the device is configured for network operation.
+can only be done by some process that runs before the device is installed for network operation.
 
 On the other end of the device life cycle, provision should be made to wipe Local keys when a device
 is decommissioned, to indicate that the device is no longer owned by the enterprise.  The manufacturer's
@@ -1183,7 +1180,7 @@ firmware stored in boot flash.  Mechanisms for maintaining the trustworthiness o
 scope for RIV, but could include immutable firmware, signed updates, or a vendor-specific hardware
 verification technique.  See {{using-tpm}} for background on TPM practices.
 
-* RIV assumes some level of physical defense for the device.  If a TPM that has already been programmed
+* The device owner SHOULD provide some level of physical defense for the device.  If a TPM that has already been programmed
 with an authentic DevID is stolen and inserted into a counterfeit device, attestation of that counterfeit
 device may become indistinguishable from an authentic device.
 
@@ -1195,15 +1192,15 @@ package, RIMs signed by the manufacturer and delivered in-band may be more conve
 
 The validity of RIV attestation results is also influenced by procedures used to create reference measurements:
 
-* While the RIM itself is signed, supply-chains must be carefully scrutinized to ensure that the values are 
+* While the RIM itself is signed, supply-chains SHOULD be carefully scrutinized to ensure that the values are 
 not subject to unexpected manipulation prior to signing.  Insider-attacks against code bases and build chains
 are particularly hard to spot.
 
-* Designers must guard against hash collision attacks.  Reference Integrity Measurements often give hashes for large objects
+* Designers SHOULD guard against hash collision attacks.  Reference Integrity Measurements often give hashes for large objects
 of indeterminate size; if one of the measured objects can be replaced with an implant engineered to produce
 the same hash, RIV will be unable to detect the substitution.  TPM1.2 uses SHA-1 hashes only, which have been
 shown to be susceptible to collision attack.  TPM2.0 will produce quotes with SHA-256, which so far has resisted
-such attacks, and consequently is RECOMMENDED.
+such attacks.  Consequently RIV implementations SHOULD use TPM2.0.
 
 # Conclusion
 
