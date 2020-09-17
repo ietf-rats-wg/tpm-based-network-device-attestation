@@ -1,0 +1,109 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2020-09-17T13:58:20.891098+00:00",
+  "repo": "ietf-rats-wg/tpm-based-network-device-attestation",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "MDExOlB1bGxSZXF1ZXN0NDQ0ODcwNzg5",
+      "title": "Add files via upload",
+      "url": "https://github.com/ietf-rats-wg/tpm-based-network-device-attestation/pull/1",
+      "state": "MERGED",
+      "author": "gfedorkow",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Revised the section \"What Does RIV Attest?\" to incorporate platform-independent notes on PCR usage.",
+      "createdAt": "2020-07-06T16:10:05Z",
+      "updatedAt": "2020-07-06T16:11:11Z",
+      "baseRepository": "ietf-rats-wg/tpm-based-network-device-attestation",
+      "baseRefName": "master",
+      "baseRefOid": "530290a98a57c09cd3f64de2f2385908f1d8d030",
+      "headRepository": "ietf-rats-wg/tpm-based-network-device-attestation",
+      "headRefName": "gfedorkow-patch-1",
+      "headRefOid": "9080bfe26fae1f301b8b2c3cc482ef9333b99730",
+      "closedAt": "2020-07-06T16:10:54Z",
+      "mergedAt": "2020-07-06T16:10:54Z",
+      "mergedBy": "gfedorkow",
+      "mergeCommit": {
+        "oid": "e8ee720910708366f365a34761c8415412eab895"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "MDExOlB1bGxSZXF1ZXN0NDcxODI3Mzkw",
+      "title": "Dave's review of Editors Copy as of August 21, 2020",
+      "url": "https://github.com/ietf-rats-wg/tpm-based-network-device-attestation/pull/2",
+      "state": "OPEN",
+      "author": "dthaler",
+      "authorAssociation": "FIRST_TIME_CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Signed-off-by: Dave Thaler <dthaler@ntdev.microsoft.com>",
+      "createdAt": "2020-08-21T19:50:24Z",
+      "updatedAt": "2020-08-21T19:50:24Z",
+      "baseRepository": "ietf-rats-wg/tpm-based-network-device-attestation",
+      "baseRefName": "master",
+      "baseRefOid": "5bac9d11a63b3e6313f8993c8099cf4ae8c1888a",
+      "headRepository": "dthaler/tpm-based-network-device-attestation",
+      "headRefName": "master",
+      "headRefOid": "044ca87d6e8ec776463c016698268c0c931971ae",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}

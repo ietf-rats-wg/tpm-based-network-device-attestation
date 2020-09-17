@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>TPM-based Network Device Remote Integrity Verification</title>
+<meta content="Guy Fedorkow" name="author">
+<meta content="Eric Voit" name="author">
+<meta content="Jessica Fitzgerald-McKay" name="author">
+<meta content="
+       This document describes a workflow for remote attestation of the integrity of network devices. 
+    " name="description">
+<meta content="xml2rfc 2.45.3" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-ietf-rats-tpm-based-network-device-attest-01" name="ietf.draft">
+<link href="draft-ietf-rats-tpm-based-network-device-attest.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@import url('https://martinthomson.github.io/i-d-template/fonts.css');
+
+html {
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --small-font-size: 14.5px;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+#title {
+  padding: 1em 0 0.2em;
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 26px;
+}
+h4, h5, h6 {
+  font-size: 18px;
+  line-height: 22px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 18px;
+  line-height: 24px;
+}
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+dd.break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px 'Oxygen Mono', monospace;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  pre {
+    display: inline-block;
+    overflow-x: auto;
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  pre + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+  table {
+    display: inline-block;
+    overflow-x: auto;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  text-align: left;
+  background-color: #eee;
+}
+tr:nth-child(2n) > td {
+  background-color: var(--background-color);
+}
+tr:nth-child(2n+1) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody > tr:nth-child(2n) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody > tr:nth-child(2n+1) > td {
+  background-color: var(--background-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 1em;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  visibility: hidden;
+  user-select: none;
+}
+a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media screen {
+  :hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 8em;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  margin: 0;
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0 0 0 calc(1em + var(--identifier-width));
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 500px) {
+  .index ul {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  .index ul ul {
+    column-count: 1;
+    column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul p, #toc ul li {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left, table .text-left {
+  text-align: left;
+}
+table .text-center, table .text-center {
+  text-align: center;
+}
+table .text-right, table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+</style>
+<link href="rfc-local.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Network Device RIV</td>
+<td class="right">July 2020</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Fedorkow, et al.</td>
+<td class="center">Expires 9 January 2021</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">RATS Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-ietf-rats-tpm-based-network-device-attest-01</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2020-07-08" class="published">8 July 2020</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2021-01-09">9 January 2021</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">G.C. Fedorkow, <span class="editor">Ed.</span>
+</div>
+<div class="org">Juniper Networks, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">E. Voit</div>
+<div class="org">Cisco Systems, Inc.</div>
+</div>
+<div class="author">
+      <div class="author-name">J. Fitzgerald-McKay</div>
+<div class="org">National Security Agency</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">TPM-based Network Device Remote Integrity Verification</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes a workflow for remote attestation of the integrity of network devices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Discussion of this document takes place on the
+  RATS Working Group mailing list (rats@ietf.org),
+  which is archived at <a href="https://mailarchive.ietf.org/arch/browse/rats/">https://mailarchive.ietf.org/arch/browse/rats/</a>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+  <a href="https://github.com/ietf-rats-wg/tpm-based-network-device-attestation">https://github.com/ietf-rats-wg/tpm-based-network-device-attestation</a>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 9 January 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2020 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-toc.1-1.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="xref">1.1</a>.  <a href="#name-terminology" class="xref">Terminology</a><a href="#section-toc.1-1.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="xref">1.2</a>.  <a href="#name-document-organization" class="xref">Document Organization</a><a href="#section-toc.1-1.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="xref">1.3</a>.  <a href="#name-goals" class="xref">Goals</a><a href="#section-toc.1-1.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.4">
+                <p id="section-toc.1-1.1.2.4.1"><a href="#section-1.4" class="xref">1.4</a>.  <a href="#name-description-of-remote-integ" class="xref">Description of Remote Integrity Verification (RIV)</a><a href="#section-toc.1-1.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.5">
+                <p id="section-toc.1-1.1.2.5.1"><a href="#section-1.5" class="xref">1.5</a>.  <a href="#name-solution-requirements" class="xref">Solution Requirements</a><a href="#section-toc.1-1.1.2.5.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.6">
+                <p id="section-toc.1-1.1.2.6.1"><a href="#section-1.6" class="xref">1.6</a>.  <a href="#name-scope" class="xref">Scope</a><a href="#section-toc.1-1.1.2.6.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.1.2.6.2.1">
+                    <p id="section-toc.1-1.1.2.6.2.1.1"><a href="#section-1.6.1" class="xref">1.6.1</a>.  <a href="#name-out-of-scope" class="xref">Out of Scope</a><a href="#section-toc.1-1.1.2.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-solution-overview" class="xref">Solution Overview</a><a href="#section-toc.1-1.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-riv-software-configuration-" class="xref">RIV Software Configuration Attestation using TPM</a><a href="#section-toc.1-1.2.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.1.2.1">
+                    <p id="section-toc.1-1.2.2.1.2.1.1"><a href="#section-2.1.1" class="xref">2.1.1</a>.  <a href="#name-what-does-riv-attest" class="xref">What Does RIV Attest?</a><a href="#section-toc.1-1.2.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-riv-keying" class="xref">RIV Keying</a><a href="#section-toc.1-1.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>.  <a href="#name-riv-information-flow" class="xref">RIV Information Flow</a><a href="#section-toc.1-1.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="xref">2.4</a>.  <a href="#name-riv-simplifying-assumptions" class="xref">RIV Simplifying Assumptions</a><a href="#section-toc.1-1.2.2.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.4.2.1">
+                    <p id="section-toc.1-1.2.2.4.2.1.1"><a href="#section-2.4.1" class="xref">2.4.1</a>.  <a href="#name-reference-integrity-manifes" class="xref">Reference Integrity Manifests (RIMs)</a><a href="#section-toc.1-1.2.2.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.2.2.4.2.2">
+                    <p id="section-toc.1-1.2.2.4.2.2.1"><a href="#section-2.4.2" class="xref">2.4.2</a>.  <a href="#name-attestation-logs" class="xref">Attestation Logs</a><a href="#section-toc.1-1.2.2.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-standards-components" class="xref">Standards Components</a><a href="#section-toc.1-1.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-prerequisites-for-riv" class="xref">Prerequisites for RIV</a><a href="#section-toc.1-1.3.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.1.2.1">
+                    <p id="section-toc.1-1.3.2.1.2.1.1"><a href="#section-3.1.1" class="xref">3.1.1</a>.  <a href="#name-unique-device-identity" class="xref">Unique Device Identity</a><a href="#section-toc.1-1.3.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.1.2.2">
+                    <p id="section-toc.1-1.3.2.1.2.2.1"><a href="#section-3.1.2" class="xref">3.1.2</a>.  <a href="#name-keys" class="xref">Keys</a><a href="#section-toc.1-1.3.2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.1.2.3">
+                    <p id="section-toc.1-1.3.2.1.2.3.1"><a href="#section-3.1.3" class="xref">3.1.3</a>.  <a href="#name-appraisal-policy-for-eviden" class="xref">Appraisal Policy for Evidence</a><a href="#section-toc.1-1.3.2.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>.  <a href="#name-reference-model-for-challen" class="xref">Reference Model for Challenge-Response</a><a href="#section-toc.1-1.3.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="xref">3.2.1</a>.  <a href="#name-transport-and-encoding" class="xref">Transport and Encoding</a><a href="#section-toc.1-1.3.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>.  <a href="#name-centralized-vs-peer-to-peer" class="xref">Centralized vs Peer-to-Peer</a><a href="#section-toc.1-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-privacy-considerations" class="xref">Privacy Considerations</a><a href="#section-toc.1-1.4.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-toc.1-1.5.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-conclusion" class="xref">Conclusion</a><a href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-toc.1-1.7.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-appendix" class="xref">Appendix</a><a href="#section-toc.1-1.8.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>.  <a href="#name-layering-model-for-network-" class="xref">Layering Model for Network Equipment Attester and Verifier</a><a href="#section-toc.1-1.8.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.8.2.1.2.1">
+                    <p id="section-toc.1-1.8.2.1.2.1.1"><a href="#section-8.1.1" class="xref">8.1.1</a>.  <a href="#name-why-is-os-attestation-diffe" class="xref">Why is OS Attestation Different?</a><a href="#section-toc.1-1.8.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>.  <a href="#name-implementation-notes" class="xref">Implementation Notes</a><a href="#section-toc.1-1.8.2.2.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="xref">8.3</a>.  <a href="#name-root-of-trust-for-measureme" class="xref">Root of Trust for Measurement</a><a href="#section-toc.1-1.8.2.3.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-toc.1-1.9.1" class="pilcrow">¶</a></p>
+</li>
+<li class="toc ulEmpty compact" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-appendix.a" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a><a href="#section-toc.1-1.10.1" class="pilcrow">¶</a></p>
+</li>
+</ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">There are many aspects to consider in fielding a trusted computing device,
+from operating systems to applications.  Mechanisms to prove that
+a device installed at a customer's site is authentic (i.e., not counterfeit) and has
+been configured with authorized software, all as part of a trusted supply chain, are just a few of the many aspects which need to be considered concurrently to have confidence that a device is truly trustworthy.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">A generic architecture for remote attestation has been defined in <span>[<a href="#I-D.ietf-rats-architecture" class="xref">I-D.ietf-rats-architecture</a>]</span>.  Additionally, the use case for remotely attesting networking devices is within Section 6 of <span>[<a href="#I-D.richardson-rats-usecases" class="xref">I-D.richardson-rats-usecases</a>]</span>.  However, these documents do not provide sufficient guidance for equipment vendors and network operators to design, build, and deploy interoperable platforms.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">The intent of this document is to provide such guidance. It does this by outlining the Remote Integrity Verification (RIV) problem, and then identifies elements that are necessary to get the complete, scalable attestation procedure working with commercial networking products such as routers, switches and firewalls.   An underlying assumption will be the availability within the device of a Trusted Platform Module (TPM) compliant cryptoprocessor to enable the remote trustworthy assessment of the device's software and hardware.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<div id="terminology">
+<section id="section-1.1">
+        <h3 id="name-terminology">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+        </h3>
+<p id="section-1.1-1">A number of terms are reused from <span>[<a href="#I-D.ietf-rats-architecture" class="xref">I-D.ietf-rats-architecture</a>]</span>.  These include: Appraisal Policy for Attestation Result, Attestation Result, Attester, Endorser, Evidence, Relying Party, Verifier, Verifier Owner.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">Additionally, this document defines the following terms:<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">Attestation: the process of creating, conveying and appraising
+assertions about Platform trustworthiness characteristics, including supply chain trust,
+identity, platform provenance, software configuration, hardware configuration, platform
+composition, compliance to test suites, functional and assurance evaluations,
+etc.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+<p id="section-1.1-4">The goal of attestation is simply to assure an administrator that the software
+that was launched when the device was last started is an authentic and untampered 
+copy of the software that the device vendor shipped.<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.1-5">Within the Trusted Computing Group context, attestation is the process by
+which an independent Verifier can obtain cryptographic proof as to the identity
+of the device in question, evidence of the integrity of software loaded on
+that device when it started up, and then verify that what's there is what's
+supposed to be there.  For networking equipment, a verifier capability can
+be embedded in a Network Management Station (NMS), a posture collection server,
+or other network analytics tool (such as a software asset management solution,
+or a threat detection and mitigation tool, etc.). While informally referred
+to as attestation, this document focuses on a subset defined here as Remote
+Integrity Verification (RIV).  RIV takes a network equipment centric perspective
+that includes a set of protocols and procedures for determining whether a
+particular device was launched with untampered software, starting from Roots
+of Trust.  While there are many ways to accomplish attestation, RIV sets
+out a specific set of protocols and tools that work in environments commonly
+found in Networking Equipment.  RIV does not cover other platform characteristics
+that could be attested (e.g. geographic location, connectivity; 
+see <span>[<a href="#I-D.richardson-rats-usecases" class="xref">I-D.richardson-rats-usecases</a>]</span>), although it does provide evidence of a secure infrastructure
+to increase the level of trust in other platform characteristics attested
+by other means (e.g., by Entity Attestation Tokens <span>[<a href="#I-D.ietf-rats-eat" class="xref">I-D.ietf-rats-eat</a>]</span>).<a href="#section-1.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="document-organization">
+<section id="section-1.2">
+        <h3 id="name-document-organization">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-document-organization" class="section-name selfRef">Document Organization</a>
+        </h3>
+<p id="section-1.2-1">The remainder of this document is organized into several sections:<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-2.1">The remainder of this section covers goals and requirements, plus a top-level description of RIV<a href="#section-1.2-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.2-2.2">The Solution Overview section outlines how RIV works<a href="#section-1.2-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.2-2.3">The Standards Components section links components of RIV to normative standards.<a href="#section-1.2-2.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.2-2.4">Privacy and Security shows how specific features of RIV contribute to the trustworthiness of the attestation result<a href="#section-1.2-2.4" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.2-2.5">Supporting material is in an appendix at the end.<a href="#section-1.2-2.5" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+<div id="goals">
+<section id="section-1.3">
+        <h3 id="name-goals">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-goals" class="section-name selfRef">Goals</a>
+        </h3>
+<p id="section-1.3-1">Network operators benefit from a trustworthy attestation mechanism that provides
+assurance that their network comprises authentic equipment, and has loaded software
+free of known vulnerabilities and unauthorized tampering.  In line with the overall goal of assuring integrity, attestation can be used for asset management, vulnerability and compliance
+assessment, plus configuration management.<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+<p id="section-1.3-2">As a part of a trusted supply chain, the RIV attestation workflow outlined in this document is intended to meet the following high-level goals:<a href="#section-1.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.3-3.1">Provable Device Identity - This specification requires that an attesting device includes
+a cryptographic identifier unique to each device.  Effectively this means that the TPM or
+equivalent cryptoprocessor must be so provisioned during the manufacturing cycle.<a href="#section-1.3-3.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.3-3.2">Software Inventory - A key goal is to identify the software release installed
+on the attesting device, and to provide evidence that the software stored within hasn't
+been altered<a href="#section-1.3-3.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.3-3.3">Verifiability - Verification of software and configuration of the device shows
+that the software that was authorized for installation by the administrator has actually been launched.<a href="#section-1.3-3.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-1.3-4">In addition, RIV is designed to operate in a centralized environment, such as with a central authority that manages and configures a number of network devices, or 'peer-to-peer', where network devices independently verify one another to establish a trust relationship.  (See <a href="#peer-to-peer" class="xref">Section 3.3</a> below, and also <span>[<a href="#I-D.voit-rats-trusted-path-routing" class="xref">I-D.voit-rats-trusted-path-routing</a>]</span>)<a href="#section-1.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="description-of-remote-integrity-verification-riv">
+<section id="section-1.4">
+        <h3 id="name-description-of-remote-integ">
+<a href="#section-1.4" class="section-number selfRef">1.4. </a><a href="#name-description-of-remote-integ" class="section-name selfRef">Description of Remote Integrity Verification (RIV)</a>
+        </h3>
+<p id="section-1.4-1">Attestation requires two interlocking services between the Attester network device and the Verifier::<a href="#section-1.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.4-2.1">Platform Identity, the mechanism providing trusted identity, can reassure network
+managers that the specific devices they ordered from authorized manufacturers for
+attachment to their network are those that were installed, and that they continue to
+be present in their network. As part of the mechanism for Platform Identity,
+cryptographic proof of the identity of the manufacturer is also provided.<a href="#section-1.4-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.4-2.2">Software Measurement is the mechanism that reports the state of mutable software components
+on the device, and can assure network managers that they have known, untampered
+software configured to run in their network.<a href="#section-1.4-2.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-1.4-3">Using these two interlocking services, RIV provides a procedure that assures a network operator that the equipment in
+their network can be reliably identified, and that untampered software of
+a known version is installed on each endpoint. Equipment in the network includes
+devices that make up the network itself, such as routers, switches and firewalls.<a href="#section-1.4-3" class="pilcrow">¶</a></p>
+<p id="section-1.4-4">RIV includes several major processes:<a href="#section-1.4-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1.4-5">
+          <li id="section-1.4-5.1">Creation of Evidence is the process whereby an Attester generates cryptographic
+proof (Evidence) of claims about platform properties. In particular, the
+platform identity and its software configuration are both of critical importance<a href="#section-1.4-5.1" class="pilcrow">¶</a>
+</li>
+<li id="section-1.4-5.2">Platform Identification refers to the mechanism assuring the
+Relying Party (ultimately, a network administrator) of the identity of devices that make up their network,
+and that their manufacturers are known.<a href="#section-1.4-5.2" class="pilcrow">¶</a>
+</li>
+<li id="section-1.4-5.3">Software used to boot a platform can be described as a chain
+of measurements, started by a Root of Trust for Measurement,
+that normally ends when the system software is loaded.
+A measurement signifies the identity, integrity and version of each
+software component registered with an attesting device's TPM, so that the
+subsequent appraisal stage can determine if the software
+installed is authentic, up-to-date, and free of tampering.<a href="#section-1.4-5.3" class="pilcrow">¶</a>
+</li>
+<li id="section-1.4-5.4">Conveyance of Evidence
+reliably transports at least the minimum amount of Evidence from Attester to a Verifier to allow a management station to perform
+a meaningful appraisal in Step 5. The transport
+is typically carried out via a management network. The channel must provide
+integrity and authenticity, and, in some use cases, may also require confidentiality.<a href="#section-1.4-5.4" class="pilcrow">¶</a>
+</li>
+<li id="section-1.4-5.5">Finally, Appraisal of Evidence occurs.  As the Verifier and Relying Party roles are
+  often combined within RIV, this is the process of verifying the Evidence received by
+  a Verifier from the Attesting device, and using an Appraisal Policy to develop an
+  Attestation Result, used to inform decision making.  In practice, this means comparing
+  the device measurements reported as Evidence with the Attester configuration expected
+  by the Verifier.  Subsequently the Appraisal Policy for Attestation Results might
+  match what was found against Reference Integrity Measurements (aka Golden
+  Measurements) which represent the intended configured state
+  of the connected device.<a href="#section-1.4-5.5" class="pilcrow">¶</a>
+</li>
+</ol>
+<p id="section-1.4-6">All implementations supporting this RIV specification require the support of the following three technologies:
+1. Identity: Platform identity can be based on IEEE 802.1AR Device Identity <span>[<a href="#IEEE-802-1AR" class="xref">IEEE-802-1AR</a>]</span>,
+   coupled with careful supply-chain management by the manufacturer.  The
+   DevID certificate contains a statement by the manufacturer that establishes
+   the identity of the device as it left the factory.  Some applications with
+   a more-complex post-manufacture supply chain (e.g. Value Added Resellers),
+   or with different privacy concerns, may want to use alternative mechanisms for platform
+   authentication (for example, TCG Platform Certificates <span>[<a href="#Platform-Certificates" class="xref">Platform-Certificates</a>]</span>).<a href="#section-1.4-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1.4-7">
+          <li id="section-1.4-7.1">Platform Attestation provides evidence of configuration of software elements
+present in the device.  This form of attestation can be implemented
+with TPM PCR, Quote and Log mechanisms, which provide an authenticated mechanism
+to report what software was started on the device through the boot cycle.  Successful attestation requires an unbroken chain from a boot-time root of trust through all layers of software needed to bring the device to an operational state.<a href="#section-1.4-7.1" class="pilcrow">¶</a>
+</li>
+<li id="section-1.4-7.2">Reference Integrity Measurements must be conveyed from the Endorser (the entity accepted as the software authority,
+often the manufacturer for embedded systems) to the system in which verification
+will take place<a href="#section-1.4-7.2" class="pilcrow">¶</a>
+</li>
+</ol>
+</section>
+</div>
+<div id="solution-requirements">
+<section id="section-1.5">
+        <h3 id="name-solution-requirements">
+<a href="#section-1.5" class="section-number selfRef">1.5. </a><a href="#name-solution-requirements" class="section-name selfRef">Solution Requirements</a>
+        </h3>
+<p id="section-1.5-1">Remote Integrity Verification must address the "Lying Endpoint"
+problem, in which malicious software on an endpoint may subvert the
+intended function, and also prevent the endpoint from reporting its compromised
+status.  (See <a href="#security-cons" class="xref">Section 5</a> for further Security Considerations)<a href="#section-1.5-1" class="pilcrow">¶</a></p>
+<p id="section-1.5-2">RIV attestation is designed to be simple
+to deploy at scale. RIV should work "out of the box" as far as possible,
+that is, with the fewest possible provisioning steps or configuration databases
+needed at the end-user's site, as network equipment is often required to "self-configure",
+to reliably reach out without manual intervention to prove its identity and
+operating posture, then download its own configuration. See <span>[<a href="#RFC8572" class="xref">RFC8572</a>]</span> for an
+example of Secure Zero Touch Provisioning.<a href="#section-1.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="scope">
+<section id="section-1.6">
+        <h3 id="name-scope">
+<a href="#section-1.6" class="section-number selfRef">1.6. </a><a href="#name-scope" class="section-name selfRef">Scope</a>
+        </h3>
+<p id="section-1.6-1">Remote Attestation is a very general problem that could apply to most network-connected computing devices.  However, this document includes several assumptions that limit the scope to Network Equipment (e.g. routers, switches and firewalls):<a href="#section-1.6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.6-2.1">This solution is for use in non-privacy-preserving applications (for example,
+networking, Industrial IoT), avoiding the need for a Privacy Certificate
+Authority for attestation keys <span>[<a href="#AIK-Enrollment" class="xref">AIK-Enrollment</a>]</span> or TCG Platform
+Certificates <span>[<a href="#Platform-Certificates" class="xref">Platform-Certificates</a>]</span><a href="#section-1.6-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.6-2.2">This document assumes network protocols that are common in networking equipment such as YANG <span>[<a href="#RFC7950" class="xref">RFC7950</a>]</span> and NETCONF <span>[<a href="#RFC6241" class="xref">RFC6241</a>]</span>,
+but not generally used in other applications.<a href="#section-1.6-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.6-2.3">The approach outlined in this document mandates the use of TPM 1.2 or TPM 2.0.  Other
+roots of trust could be used with the same information flow, although different
+data structures would likely be called for.<a href="#section-1.6-2.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<div id="out-of-scope">
+<section id="section-1.6.1">
+          <h4 id="name-out-of-scope">
+<a href="#section-1.6.1" class="section-number selfRef">1.6.1. </a><a href="#name-out-of-scope" class="section-name selfRef">Out of Scope</a>
+          </h4>
+<ul class="normal">
+<li class="normal" id="section-1.6.1-1.1">Run-Time Attestation: Run-time attestation of Linux or other multi-threaded
+operating system processes considerably expands the scope of the problem.
+Many researchers are working on that problem, but this document defers the
+run-time attestation problem.<a href="#section-1.6.1-1.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.6.1-1.2">Multi-Vendor Embedded Systems: Additional coordination would be needed for
+devices that themselves comprise hardware and software from multiple vendors,
+integrated by the end user.<a href="#section-1.6.1-1.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.6.1-1.3">Processor Sleep Modes: Network equipment typically does not "sleep", so
+sleep and hibernate modes are not considered.  Although out of scope
+for RIV, Trusted Computing Group specifications do encompass sleep and hibernate
+states.<a href="#section-1.6.1-1.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-1.6.1-1.4">Virtualization and Containerization:  In a non-virtualized system, the host OS is
+responsible for measuring each Userland file or process, but that't the end of the
+chain of trust.  For virtualized systems, the host OS must verify the hypervisor, 
+which then manages its own chain of trust through the virtual machine.  Virtualization 
+and containerization technologies are increasingly used in Network equipment, but 
+are not considered in this revision of the document.<a href="#section-1.6.1-1.4" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="solution-overview">
+<section id="section-2">
+      <h2 id="name-solution-overview">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-solution-overview" class="section-name selfRef">Solution Overview</a>
+      </h2>
+<div id="riv-software-configuration-attestation-using-tpm">
+<section id="section-2.1">
+        <h3 id="name-riv-software-configuration-">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-riv-software-configuration-" class="section-name selfRef">RIV Software Configuration Attestation using TPM</a>
+        </h3>
+<p id="section-2.1-1">RIV Attestation is a process which can be used to determine the identity of software running
+on a specifically-identified device.  Remote Attestation is broken into two
+phases, shown in Figure 1:<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-2.1">During system startup, each distinct software object is "measured".
+Its identity, hash (i.e. cryptographic digest) and version information are recorded in a log.
+Hashes are also extended, or cryptographically folded, into the TPM, in a way that can be used to validate the log entries.  The measurement process generally
+follows the Chain of Trust model used in Measured Boot, where each stage
+of the system measures the next one, and extends its measurement into the TPM,
+before launching it.<a href="#section-2.1-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1-2.2">Once the device is running and has operational network connectivity, a separate,
+trusted Verifier will interrogate the network
+device to retrieve the logs and a copy of the digests collected by hashing
+each software object, signed by an attestation private key known only to
+the TPM.<a href="#section-2.1-2.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-2.1-3">The result is that the Verifier can verify the device's identity by checking
+the certificate containing the TPM's attestation public key, and can
+validate the software that was launched by comparing digests in the log with
+known-good values, and verifying their correctness by comparing with the
+signed digests from the TPM.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">It should be noted that attestation and identity are inextricably linked;
+signed Evidence that a particular version of software was loaded is of little
+value without cryptographic proof of the identity of the Attester producing
+the Evidence.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<span id="name-riv-attestation-model"></span><div id="RIV-Attestation-Model">
+<figure id="figure-1">
+          <div class="artwork art-text alignLeft" id="section-2.1-5.1">
+<pre>
+    +-------------------------------------------------------+
+    | +--------+    +--------+   +--------+    +---------+  |
+    | | BIOS   |---&gt;| Loader |--&gt;| Kernel |---&gt;|Userland |  |
+    | +--------+    +--------+   +--------+    +---------+  |
+    |     |            |           |                        |
+    |     |            |           |                        |
+    |     +------------+-----------+-+                      |
+    |                        Step 1  |                      |
+    |                                V                      |
+    |                            +--------+                 |
+    |                            |  TPM   |                 |
+    |                            +--------+                 |
+    |   Router                       |                      |
+    +--------------------------------|----------------------+
+                                     |
+                                     |  Step 2
+                                     |    +-----------+
+                                     +---&gt;| Verifier  |
+                                          +-----------+
+
+    Reset---------------flow-of-time-during-boot--...-------&gt;
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-riv-attestation-model" class="selfRef">RIV Attestation Model</a>
+          </figcaption></figure>
+</div>
+<p id="section-2.1-6">In Step 1, measurements are "extended" into the TPM as processes start. In
+Step 2, signed PCR digests are retrieved from the TPM for off-box analysis
+after the system is operational.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+<div id="what-does-riv-attest">
+<section id="section-2.1.1">
+          <h4 id="name-what-does-riv-attest">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-what-does-riv-attest" class="section-name selfRef">What Does RIV Attest?</a>
+          </h4>
+<p id="section-2.1.1-1">TPM attestation is strongly focused on Platform Configuration Registers (PCRs), but those registers are only vehicles for certifying 
+accompanying Evidence, conveyed in log entries.  It is the hashes in log entries that are extended into PCRs, where the final digests 
+can be retrieved in the form of a Quote signed by a key known only to the TPM.  The use of multiple PCRs serves only to 
+provide some independence between different classes of object, so that one class of objects can be updated without changing the 
+extended hash for other classes.  Although PCRs can be used for any purpose, this section outlines the objects within the 
+scope of this document which may be extended into the TPM.<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-2">In general, PCRs are organized to independently attest three classes of object:<a href="#section-2.1.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1.1-3.1">Code, i.e., instructions to be executed by a CPU.<a href="#section-2.1.1-3.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1.1-3.2">Configuration - Many devices offer numerous options controlled by non-volatile configuration variables which can impact the device's security posture.  These settings may have vendor defaults, but often can be changed by administrators, who may want to verify via attestation that the settings they intend are still in place.<a href="#section-2.1.1-3.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1.1-3.3">Credentials - Administrators may wish to verify via attestation that keys (and other credentials) outside the Root of Trust have not been subject to unauthorized tampering.  (By definition, keys inside the root of trust can't be verified independently)<a href="#section-2.1.1-3.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-2.1.1-4">The TCG PC Client Platform Firmware Profile Specification <span>[<a href="#PC-Client-BIOS-TPM-2.0" class="xref">PC-Client-BIOS-TPM-2.0</a>]</span> gives considerable detail on what is to be 
+measured during the boot phase of a platform boot using a UEFI BOIS (www.uefi.org), but the goal is simply to measure every bit of 
+code executed in the process of starting the device, along with any configuration information related to security posture, leaving 
+no gap for unmeasured code to subvert the chain.<a href="#section-2.1.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-5">For platforms using a UEFI BIOS, <span>[<a href="#PC-Client-BIOS-TPM-2.0" class="xref">PC-Client-BIOS-TPM-2.0</a>]</span> gives detailed normative requirements for PCR usage.  But for other 
+platform architectures, the table in <a href="#Attested-Objects" class="xref">Figure 2</a> gives guidance for PCR assignment that generalizes the specific 
+details of <span>[<a href="#PC-Client-BIOS-TPM-2.0" class="xref">PC-Client-BIOS-TPM-2.0</a>]</span>.<a href="#section-2.1.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-6">By convention, most PCRs are allocated in pairs, which the even-numbered PCR used to measure executable code, and 
+the odd-numbered PCR used to measure whatever data and configuration are associated with that code.  It is important 
+to note that each PCR may contain results from dozens (or even thousands) of individual measurements.<a href="#section-2.1.1-6" class="pilcrow">¶</a></p>
+<span id="name-attested-objects"></span><div id="Attested-Objects">
+<figure id="figure-2">
+            <div class="artwork art-text alignLeft" id="section-2.1.1-7.1">
+<pre>
++------------------------------------------------------------------+
+|                                            |   Allocated PCR #   |
+| Function                                   | Code | Configuration|
+--------------------------------------------------------------------
+| Firmware Static Root of Trust, i.e.,       |  0   |    1         |
+| initial boot firmware and drivers          |      |              |
+--------------------------------------------------------------------
+| Drivers and initialization for optional    |  2   |    3         |
+| or add-in devices                          |      |              |
+--------------------------------------------------------------------
+| OS Loader code and configuration, i.e.,    |  4   |    5         |
+| the code launched by firmware to load an   |      |              |
+| operating system kernel. These PCRs record |      |              |
+| each boot attempt, and an identifier for   |      |              |
+| where the loader was found                 |      |              |
+--------------------------------------------------------------------
+| Vendor Specific Measurements during boot   |  6   |    6         |
+--------------------------------------------------------------------
+| Secure Boot Policy.  This PCR records keys |      |    7         |
+| and configuration used to validate the OS  |      |              |
+| loader                                     |      |              |
+--------------------------------------------------------------------
+| Measurements made by the OS Loader         |  8   |    9         |
+| (e.g GRUB2 for Linux)                      |      |              |
+--------------------------------------------------------------------
+| Measurements made by OS (e.g. Linux IMA)   |  10  |    10        |
++------------------------------------------------------------------+
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-attested-objects" class="selfRef">Attested Objects</a>
+            </figcaption></figure>
+</div>
+<p id="section-2.1.1-8">Notes on PCR Allocations<a href="#section-2.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-9">It is important to recognize that PCR[0] is critical.  The first measurement into PCR[0] taken by the Root of Trust for 
+Measurement, is critical to 
+establishing the chain of trust for all subsequent measurements.  If the PCR[0] measurement cannot be trusted, the 
+validity of the entire chain is put into question.<a href="#section-2.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-10">Distinctions Between PCR[0], PCR[2], PCR[4] and PCR[8]<a href="#section-2.1.1-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1.1-11.1">PCR[0] typically represents a consistent view of the Host Platform between boot cycles, allowing Attestation and 
+Sealed Storage policies to be defined using the less changeable components of the transitive trust chain. This PCR 
+typically provides a consistent view of the platform regardless of user selected options.<a href="#section-2.1.1-11.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1.1-11.2">PCR[2] is intended to represent a "user configurable" environment where the user has the ability to alter the 
+components that are measured into PCR[2]. This is typically done by adding adapter cards, etc., into user-accessible 
+PCI or other slots.  In UEFI systems these devices may be configured by Option ROMsm easured into PCR[2] and 
+executed by the BIOS.<a href="#section-2.1.1-11.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1.1-11.3">PCR[4] is intended to represent the software that manages the transition between the platform's Pre-Operating System 
+Start and the state of a system with the Operating System present.  This PCR, along with PCR[5], identifies the initial 
+operating system loader (e.g. GRUB for Linux)<a href="#section-2.1.1-11.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.1.1-11.4">PCR[8] is used by the OS loader to record measurements of the various components of the operating system.<a href="#section-2.1.1-11.4" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-2.1.1-12">Although the TCG PC Client document specifies the use of the first eight PCRs very carefully to ensure interoperability 
+among multiple 
+UEFI BIOS vendors, it should be noted that embedded software vendors may have considerably more flexibility.  Verifiers 
+typically need to know which log entries are consequential and which are not (possibly controlled by local policies) but 
+the verifier may not need to know what each log entry means or why it was assigned to a particular PCR.   Designers must
+recognize that some PCRs may cover log entries that a particular verifier considers critical and other log entries that
+are not considered important, so differing PCR values may not on their own constitute a check for authenticity.<a href="#section-2.1.1-12" class="pilcrow">¶</a></p>
+<p id="section-2.1.1-13">Designers may allocate particular events to specific PCRs in order to achieve a particular objective with Local 
+Attestation, i.e., allowing a procedure to execute only if a given PCR is in a given state.  It may also be important 
+to designers to consider whether streaming notification of PCR updates is required (see ID Rats Streaming).  Specific 
+log entries can only be validated if the verifier receives every log entry affecting the relevant PCR, so (for example) 
+a designer might want to separate rare, high-value events such as configuration changes, from high-volume, routine 
+measurements such as IMA logs.<a href="#section-2.1.1-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="riv-keying">
+<section id="section-2.2">
+        <h3 id="name-riv-keying">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-riv-keying" class="section-name selfRef">RIV Keying</a>
+        </h3>
+<p id="section-2.2-1">RIV attestation relies on two keys:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-2.1">An identity key is required to certify the identity of the Attester itself.
+RIV specifies the use of an IEEE 802.1AR DevID <span>[<a href="#IEEE-802-1AR" class="xref">IEEE-802-1AR</a>]</span>,
+signed by the device manufacturer, containing the device serial number.<a href="#section-2.2-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.2-2.2">An Attestation Key is required to sign the Quote generated by the TPM to report evidence
+of software configuration.<a href="#section-2.2-2.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-2.2-3">In TPM application, the Attestation key must be protected by the TPM, and the DevID
+should be as well.  Depending on other TPM configuration procedures,
+the two keys may be different.  Some of the considerations are outlined in TCG
+Guidance for Securing Network Equipment <span>[<a href="#NetEq" class="xref">NetEq</a>]</span>.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+<p id="section-2.2-4">TCG Guidance for Securing Network Equipment specifies further conventions for these keys:<a href="#section-2.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-5.1">When separate Identity and Attestation keys are used, the Attestation
+Key (AK) and its x.509 certificate should parallel the DevID, with the same
+device ID information as the DevID certificate (i.e., the same Subject Name
+and Subject Alt Name, even though the key pairs are different).  This allows
+a quote from the device, signed by an AK, to be linked directly to the
+device that provided it, by examining the corresponding AK certificate.<a href="#section-2.2-5.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.2-5.2">Network devices that are expected to use secure zero touch provisioning as
+specified in <span>[<a href="#RFC8572" class="xref">RFC8572</a>]</span>)
+must be shipped by the manufacturer with pre-provisioned keys (Initial DevID and AK,
+called IDevID and IAK).  Inclusion of an DevID and IAK by a vendor does not
+preclude a mechanism whereby an Administrator can define Local Identity and
+Attestation Keys (LDevID and LAK) if desired.<a href="#section-2.2-5.2" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+<div id="riv-information-flow">
+<section id="section-2.3">
+        <h3 id="name-riv-information-flow">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-riv-information-flow" class="section-name selfRef">RIV Information Flow</a>
+        </h3>
+<p id="section-2.3-1">RIV workflow for networking equipment is organized around a simple use-case,
+where a network operator wishes to verify the integrity of software installed
+in specific, fielded devices.  This use-case implies several components:<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2.3-2">
+          <li id="section-2.3-2.1">The Attesting Device, which the network operator wants to examine.<a href="#section-2.3-2.1" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-2.2">A Verifier (which might be a network management station) somewhere separate
+  from the Device that will retrieve the information and analyze it to pass
+  judgment on the security posture of the device.<a href="#section-2.3-2.2" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-2.3">A Relying Party, which can act on Attestation results.  Interaction between the Relying Party and the
+  Verifier is considered out of scope for RIV.<a href="#section-2.3-2.3" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-2.4">Signed Reference Integrity Manifests (RIMs),
+containing Reference Integrity Measurements, can
+  either be created by the device manufacturer
+  and shipped along with the device as part of its software image, or alternatively,
+  could be obtained several other ways (direct to the Verifier from the
+  manufacturer, from a third party, from the owner's observation of what's
+  thought to be a "known good system", etc.).  Retrieving RIMs from the device
+  itself allows attestation to be done in systems which may not have access
+  to the public internet, or by other devices that are not management stations
+  per-se (e.g., a peer device;   See <a href="#RIM-policy" class="xref">Section 3.1.3</a>).  If reference measurements are obtained from
+  multiple sources, the Verifier may need to evaluate the relative level of
+  trust to be placed in each source in case of a discrepancy.<a href="#section-2.3-2.4" class="pilcrow">¶</a>
+</li>
+</ol>
+<p id="section-2.3-3">These components are illustrated in Figure 2.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3-4">A more-detailed taxonomy of terms is given in <span>[<a href="#I-D.ietf-rats-architecture" class="xref">I-D.ietf-rats-architecture</a>]</span><a href="#section-2.3-4" class="pilcrow">¶</a></p>
+<span id="name-riv-reference-configuration"></span><div id="RIV-Reference-Configuration">
+<figure id="figure-3">
+          <div class="artwork art-text alignLeft" id="section-2.3-5.1">
+<pre>
++---------------+        +-------------+        +---------+--------+
+|               |        | Attester    | Step 1 | Verifier|        |
+| Endorser      |        | (Device     |&lt;-------| (Network| Relying|
+| (Device       |        | under       |-------&gt;| Mngmt   | Party  |
+| Manufacturer  |        | attestation)| Step 2 | Station)|        |
+| or other      |        |             |        |         |        |
+| authority)    |        |             |        |         |        |
++---------------+        +-------------+        +---------+--------+
+       |                                             /\
+       |                  Step 0                      |
+       -----------------------------------------------
+
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-riv-reference-configuration" class="selfRef">RIV Reference Configuration for Network Equipment</a>
+          </figcaption></figure>
+</div>
+<p id="section-2.3-6">In Step 0, The Endorser (the device manufacturer) provides a Software Image
+to the Attester (the device under attestation), and makes 
+one or more Reference Integrity Manifests (RIMs) signed by the Endorser, available to the Verifier 
+(see <a href="#RIM-policy" class="xref">Section 3.1.3</a> for "in-band" and "out of band" ways to make this happen). In Step 1, 
+the Verifier (Network Management Station), on behalf of a Relying Party, requests Identity,
+Measurement Values (and possibly RIMs) from the Attester. In Step 2, the
+Attester responds to the request by providing a DevID, quotes (measured values),
+and optionally RIMs, signed by the Attester.<a href="#section-2.3-6" class="pilcrow">¶</a></p>
+<p id="section-2.3-7">The following standards components may be used:<a href="#section-2.3-7" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2.3-8">
+          <li id="section-2.3-8.1">TPM Keys are configured according to <span>[<a href="#Platform-DevID-TPM-2.0" class="xref">Platform-DevID-TPM-2.0</a>]</span>, <span>[<a href="#PC-Client-BIOS-TPM-1.2" class="xref">PC-Client-BIOS-TPM-1.2</a>]</span>, or <span>[<a href="#Platform-ID-TPM-1.2" class="xref">Platform-ID-TPM-1.2</a>]</span><a href="#section-2.3-8.1" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-8.2">Measurements of firmware and bootable modules may be taken according to TCG PC Client <span>[<a href="#PC-Client-BIOS-TPM-2.0" class="xref">PC-Client-BIOS-TPM-2.0</a>]</span> and Linux IMA <span>[<a href="#IMA" class="xref">IMA</a>]</span><a href="#section-2.3-8.2" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-8.3">Device Identity is managed by IEEE 802.1AR certificates <span>[<a href="#IEEE-802-1AR" class="xref">IEEE-802-1AR</a>]</span>, with keys protected by TPMs.<a href="#section-2.3-8.3" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-8.4">Attestation logs may be formatted according to the Canonical Event Log format <span>[<a href="#Canonical-Event-Log" class="xref">Canonical-Event-Log</a>]</span>, although other specialized formats may be used.<a href="#section-2.3-8.4" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-8.5">Quotes are retrieved from the TPM according to the TCG TAP Information Model <span>[<a href="#TAP" class="xref">TAP</a>]</span>.  While the TAP IM gives a protocol-independent description of the data elements involved, it's important to note that quotes from the TPM are signed inside the TPM, so must be retrieved in a way that does not invalidate the signature, as specified in <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span>, to preserve the trust model.  (See <a href="#security-cons" class="xref">Section 5</a> Security Considerations).<a href="#section-2.3-8.5" class="pilcrow">¶</a>
+</li>
+<li id="section-2.3-8.6">Reference Integrity Measurements may be encoded as CoSWID tags, as defined in
+  the TCG RIM document <span>[<a href="#RIM" class="xref">RIM</a>]</span>, compatible with NIST IR 8060 <span>[<a href="#NIST-IR-8060" class="xref">NIST-IR-8060</a>]</span> and the IETF CoSWID draft <span>[<a href="#I-D.ietf-sacm-coswid" class="xref">I-D.ietf-sacm-coswid</a>]</span>.  See <a href="#RIM-section" class="xref">Section 2.4.1</a>.<a href="#section-2.3-8.6" class="pilcrow">¶</a>
+</li>
+</ol>
+</section>
+</div>
+<div id="riv-simplifying-assumptions">
+<section id="section-2.4">
+        <h3 id="name-riv-simplifying-assumptions">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-riv-simplifying-assumptions" class="section-name selfRef">RIV Simplifying Assumptions</a>
+        </h3>
+<p id="section-2.4-1">This document makes the following simplifying assumptions to reduce complexity:<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.4-2.1">The product to be attested is shipped with an IEEE 802.1AR DevID and an Initial
+Attestation Key (IAK) with certificate.  The IAK cert contains the same identity
+information as the DevID (specifically, the same Subject Name and Subject
+Alt Name, signed by the manufacturer), but it's a type of key that can be
+used to sign a TPM Quote.  This convention is described in TCG Guidance for
+Securing Network Equipment <span>[<a href="#NetEq" class="xref">NetEq</a>]</span>. For network equipment, which is generally non-privacy-sensitive, shipping
+a device with both an IDevID and an IAK already provisioned substantially
+simplifies initial startup. Privacy-sensitive applications may use the TCG
+Platform Certificate and additional procedures to install identity credentials
+on the platform after manufacture.<a href="#section-2.4-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.4-2.2">The product is equipped with a Root of Trust for Measurement, Root of Trust
+for Storage and Root of Trust for Reporting (as defined in <span>[<a href="#GloPlaRoT" class="xref">GloPlaRoT</a>]</span>) that are
+capable of conforming to the TCG Trusted Attestation Protocol (TAP) Information Model <span>[<a href="#TAP" class="xref">TAP</a>]</span>.<a href="#section-2.4-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.4-2.3">The vendor will ship Reference Integrity Measurements (i.e., known-good measurements)
+in the form of signed CoSWID tags <span>[<a href="#I-D.ietf-sacm-coswid" class="xref">I-D.ietf-sacm-coswid</a>]</span>, <span>[<a href="#SWID" class="xref">SWID</a>]</span>,
+as described in TCG Reference Integrity Measurement Manifest Information Model <span>[<a href="#RIM" class="xref">RIM</a>]</span>.<a href="#section-2.4-2.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<div id="RIM-section">
+<section id="section-2.4.1">
+          <h4 id="name-reference-integrity-manifes">
+<a href="#section-2.4.1" class="section-number selfRef">2.4.1. </a><a href="#name-reference-integrity-manifes" class="section-name selfRef">Reference Integrity Manifests (RIMs)</a>
+          </h4>
+<p id="section-2.4.1-1"><span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span> focuses on collecting and transmitting evidence in
+the form of PCR measurements and attestation logs.  But the critical part
+of the process is enabling the verifier to decide whether the measurements
+are "the right ones" or not.<a href="#section-2.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-2">While it must be up to network administrators to decide what they want on
+their networks, the software supplier should supply the Reference Integrity
+Measurements that
+may be used by a verifier to determine if evidence shows known good, known
+bad or unknown software configurations.<a href="#section-2.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-3">In general, there are two kinds of reference measurements:<a href="#section-2.4.1-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2.4.1-4">
+            <li id="section-2.4.1-4.1">Measurements of early system startup (e.g., BIOS, boot loader, OS kernel)
+are essentially single threaded, and executed exactly once, in a known sequence,
+before any results could be reported.  In this case, while the method for
+computing the hash and extending relevant PCRs may be complicated, the net
+result is that the software (more likely, firmware) vendor will have one
+known good PCR value that "should" be present in the relevant PCRs after the box has
+booted.  In this case, the signed reference measurement could simply list the
+expected hashes for the given version.  However, a RIM that contains the
+intermediate hashes can be useful in debugging cases where the expected final hash
+is not the one reported.<a href="#section-2.4.1-4.1" class="pilcrow">¶</a>
+</li>
+<li id="section-2.4.1-4.2">Measurements taken later in operation of the system, once an OS has started
+(for example, Linux IMA<span>[<a href="#IMA" class="xref">IMA</a>]</span>), may be more complex, with unpredictable "final"
+PCR values.  In this case, the Verifier must have enough information to reconstruct
+the expected PCR values from logs and signed reference measurements from
+a trusted authority.<a href="#section-2.4.1-4.2" class="pilcrow">¶</a>
+</li>
+</ol>
+<p id="section-2.4.1-5">In both cases, the expected values can be expressed as signed SWID or CoSWID tags,
+but the SWID structure in the second case is somewhat more complex, as reconstruction of the extended hash in a PCR may involve thousands of files and other objects.<a href="#section-2.4.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-6">The TCG has published an information model defining elements of reference integrity
+manifests under the title TCG Reference Integrity Manifest Information Model <span>[<a href="#RIM" class="xref">RIM</a>]</span>.  This information model outlines how SWID tags should be structured to allow attestation, and defines "bundles" of SWID tags that may be needed to describe a complete software release.  The RIM contains metadata relating to the software release it belongs to, plus hashes for each individual file or other object that could be attested.<a href="#section-2.4.1-6" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-7">TCG has also published the PC Client Reference Integrity Measurement specification <span>[<a href="#PC-Client-RIM" class="xref">PC-Client-RIM</a>]</span>, which focuses on a SWID-compatible format suitable for expressing expected measurement values in the specific case of a UEFI-compatible BIOS, where the SWID focus on files and file systems is not a direct fit.  While the PC Client RIM is not directly applicable to network equipment, many vendors do use a conventional UEFI BIOS to launch their network OS.<a href="#section-2.4.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="attestation-logs">
+<section id="section-2.4.2">
+          <h4 id="name-attestation-logs">
+<a href="#section-2.4.2" class="section-number selfRef">2.4.2. </a><a href="#name-attestation-logs" class="section-name selfRef">Attestation Logs</a>
+          </h4>
+<p id="section-2.4.2-1">Quotes from a TPM can provide evidence of the state of a device up to the time
+the evidence was recorded, but to make sense of the quote in most cases an
+event log that identifies which software modules contributed which values to the quote
+during startup must also be provided.  The log must contain enough information
+to demonstrate its integrity by allowing exact reconstruction of the digest
+conveyed in the signed quote (i.e., PCR values).<a href="#section-2.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.4.2-2">There are multiple event log formats which may be supported as viable formats of Evidence between the Attester and Verifier:<a href="#section-2.4.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.4.2-3.1">Event log exports from <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span><a href="#section-2.4.2-3.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.4.2-3.2">IMA Event log file exports <span>[<a href="#IMA" class="xref">IMA</a>]</span><a href="#section-2.4.2-3.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.4.2-3.3">TCG UEFI BIOS event log (TCG EFI Platform Specification for TPM Family 1.1 or
+1.2, Section 7 <span>[<a href="#EFI-TPM" class="xref">EFI-TPM</a>]</span>)<a href="#section-2.4.2-3.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-2.4.2-3.4">TCG Canonical Event Log <span>[<a href="#Canonical-Event-Log" class="xref">Canonical-Event-Log</a>]</span><a href="#section-2.4.2-3.4" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="standards-components">
+<section id="section-3">
+      <h2 id="name-standards-components">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-standards-components" class="section-name selfRef">Standards Components</a>
+      </h2>
+<div id="prerequisites-for-riv">
+<section id="section-3.1">
+        <h3 id="name-prerequisites-for-riv">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-prerequisites-for-riv" class="section-name selfRef">Prerequisites for RIV</a>
+        </h3>
+<p id="section-3.1-1">The Reference Interaction Model for Challenge-Response-based Remote Attestation
+is based on the standard roles defined in <span>[<a href="#I-D.ietf-rats-architecture" class="xref">I-D.ietf-rats-architecture</a>]</span>.  However additional prerequisites must be established to allow for interoperable RIV use case implementations.  These prerequisites are intended to provide sufficient context information so that the Verifier can acquire and evaluate Attester measurements.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<div id="unique-device-identity">
+<section id="section-3.1.1">
+          <h4 id="name-unique-device-identity">
+<a href="#section-3.1.1" class="section-number selfRef">3.1.1. </a><a href="#name-unique-device-identity" class="section-name selfRef">Unique Device Identity</a>
+          </h4>
+<p id="section-3.1.1-1">A Secure device Identity (DevID) in the form of an IEEE 802.1AR certificate <span>[<a href="#IEEE-802-1AR" class="xref">IEEE-802-1AR</a>]</span> must be provisioned in the Attester's TPMs.<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="keys">
+<section id="section-3.1.2">
+          <h4 id="name-keys">
+<a href="#section-3.1.2" class="section-number selfRef">3.1.2. </a><a href="#name-keys" class="section-name selfRef">Keys</a>
+          </h4>
+<p id="section-3.1.2-1">The Attestation Identity Key (AIK) and certificate must also be provisioned on the Attester according to <span>[<a href="#Platform-DevID-TPM-2.0" class="xref">Platform-DevID-TPM-2.0</a>]</span>, <span>[<a href="#PC-Client-BIOS-TPM-1.2" class="xref">PC-Client-BIOS-TPM-1.2</a>]</span>, or <span>[<a href="#Platform-ID-TPM-1.2" class="xref">Platform-ID-TPM-1.2</a>]</span>.<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.2-2">The Attester's TPM Keys must be associated with the DevID on the Verifier (see <a href="#security-cons" class="xref">Section 5</a> Security Considerations).<a href="#section-3.1.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="RIM-policy">
+<section id="section-3.1.3">
+          <h4 id="name-appraisal-policy-for-eviden">
+<a href="#section-3.1.3" class="section-number selfRef">3.1.3. </a><a href="#name-appraisal-policy-for-eviden" class="section-name selfRef">Appraisal Policy for Evidence</a>
+          </h4>
+<p id="section-3.1.3-1">(Editor's Note - terminology in this section must be brought back into line with the RATS Architecture definitions)<a href="#section-3.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.3-2">The Verifier must obtain the Appraisal Policy for Evidence.  This policy may be in the form of reference measurements (e.g., Known Good Values, CoSWID tags <span>[<a href="#I-D.birkholz-yang-swid" class="xref">I-D.birkholz-yang-swid</a>]</span>). These reference measurements will eventually be compared to signed PCR Evidence acquired from an Attester's TPM.<a href="#section-3.1.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.1.3-3">This document does not specify the format or contents for the Appraisal Policy for Evidence.  But acquiring this policy may happen in one of two ways:<a href="#section-3.1.3-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3.1.3-4">
+            <li id="section-3.1.3-4.1">a Verifier obtains reference measurements directly from a Verifier Owner (i.e., a Device Configuration Authority) chosen by the Verifier administrator.<a href="#section-3.1.3-4.1" class="pilcrow">¶</a>
+</li>
+<li id="section-3.1.3-4.2">Signed reference measurements may be distributed by the Verifier Owner to the Attester.  From there, the reference measurement may be acquired by the Verifier.<a href="#section-3.1.3-4.2" class="pilcrow">¶</a>
+</li>
+</ol>
+<span id="name-appraisal-policy-for-evidenc"></span><div id="Appraisal-Prerequisites">
+<figure id="figure-4">
+            <div class="artwork art-text alignLeft" id="section-3.1.3-5.1">
+<pre>
+*************         .-------------.         .-----------.
+* Verifier  *         | Attester    |         | Verifier/ |
+* Owner     *         |             |         | Relying   |
+*(Device    *----2---&gt;| (Network    |----2---&gt;| Party     |
+* config    *         |  Device)    |         |(Ntwk Mgmt |
+* Authority)*         |             |         |  Station) |
+*************         '-------------'         '-----------'
+        |                                           ^
+        |                                           |
+        '----------------1--------------------------'
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-appraisal-policy-for-evidenc" class="selfRef">Appraisal Policy for Evidence Prerequisites</a>
+            </figcaption></figure>
+</div>
+<p id="section-3.1.3-6">In either case the Appraisal Policy for Evidence must be generated, acquired and delivered in a secure way.  This includes reference measurements of:<a href="#section-3.1.3-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1.3-7.1">firmware and bootable modules taken according to TCG PC Client <span>[<a href="#PC-Client-BIOS-TPM-2.0" class="xref">PC-Client-BIOS-TPM-2.0</a>]</span> and Linux IMA <span>[<a href="#IMA" class="xref">IMA</a>]</span><a href="#section-3.1.3-7.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.1.3-7.2">encoded CoSWID tags signed by the device manufacturer, are as defined in the TCG RIM document <span>[<a href="#RIM" class="xref">RIM</a>]</span>, compatible with NIST IR 8060 <span>[<a href="#NIST-IR-8060" class="xref">NIST-IR-8060</a>]</span> and the IETF CoSWID draft <span>[<a href="#I-D.ietf-sacm-coswid" class="xref">I-D.ietf-sacm-coswid</a>]</span>.<a href="#section-3.1.3-7.2" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+</section>
+</div>
+<div id="reference-model-for-challenge-response">
+<section id="section-3.2">
+        <h3 id="name-reference-model-for-challen">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-reference-model-for-challen" class="section-name selfRef">Reference Model for Challenge-Response</a>
+        </h3>
+<p id="section-3.2-1">Once the prerequisites for RIV are met, a Verifier may acquire Evidence from an Attester.  The following diagram illustrates a RIV information flow between a Verifier and an Attester.  Event times shown correspond to the time types described within Appendix A of <span>[<a href="#I-D.ietf-rats-architecture" class="xref">I-D.ietf-rats-architecture</a>]</span>:<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<span id="name-ietf-attestation-informatio"></span><div id="IETF-Attestation-Information-Flow">
+<figure id="figure-5">
+          <div class="artwork art-text alignLeft" id="section-3.2-2.1">
+<pre>
+.----------.                        .--------------------------.
+| Attester |                        | Relying Party / Verifier |
+'----------'                        '--------------------------'
+   time(vg)                                              |
+     |&lt;-- requestAttestation(nonce,PcrSelection)-------time(ns)
+     |                                                   |
+   time(eg) LogEvidence(assertionsSelection)             |
+     |      SignedPcrEvidence(PCR, nonce)                |
+     |                                                   |
+     |-----------LogEvidence,SignedPcrEvidence----------&gt;|
+     |                                                   |
+     |                       verifyAttestationEvidence time(rg,ra)
+     |                                                   ~
+                                                       time(rx)
+</pre>
+</div>
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<a href="#name-ietf-attestation-informatio" class="selfRef">IETF Attestation Information Flow</a>
+          </figcaption></figure>
+</div>
+<ul class="normal">
+<li class="normal" id="section-3.2-3.1">time(vg): One or more Attesting Network Device PCRs are extended with measurements.<a href="#section-3.2-3.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.2">time(ns): The Verifier generates a unique nonce ("number used once"), and makes a request attestation data for one or more PCRs from an Attester.  This can be accomplished via a YANG <span>[<a href="#RFC7950" class="xref">RFC7950</a>]</span> interface that implements the TCG TAP model (e.g. YANG Module for Basic Challenge-Response-based Remote Attestation Procedures <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span>).<a href="#section-3.2-3.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.3">time(eg): On the Attester, measured values are retrieved from the Attester's TPM. This requested PCR evidence is signed by the Attestation Identity Key (AIK) associated with the DevID.  Quotes are retrieved according to TCG TAP Information Model <span>[<a href="#TAP" class="xref">TAP</a>]</span>.  While the TAP IM gives a protocol-independent description of the data elements involved, it's important to note that quotes from the TPM are signed inside the TPM, so must be retrieved in a way that does not invalidate the signature, as specified in <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span>, to preserve the trust model.  (See <a href="#security-cons" class="xref">Section 5</a> Security Considerations).  At the same time, the Attester collects log evidence showing what values have been extended into that PCR.<a href="#section-3.2-3.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.4">Collected Evidence is passed from the Attester to the Verifier<a href="#section-3.2-3.4" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.5">
+            <p id="section-3.2-3.5.1">time(rg,ra): The Verifier reviews the Evidence and takes action as needed.  As the Relying Party and Verifier are assumed co-resident, this can happen in one step.<a href="#section-3.2-3.5.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-3.5.2.1">If the signed PCR values do not match either KGVs, or the set of log entries which have extended a particular PCR, the device should not be trusted.<a href="#section-3.2-3.5.2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.5.2.2">If the set of log entries are not seen as acceptable by the Appraisal Policy for Evidence, the device should not be trusted.<a href="#section-3.2-3.5.2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2-3.5.2.3">If the AIK signature is not correct, or freshness such as that provided by the nonce is not included in the response, the device should not be trusted.<a href="#section-3.2-3.5.2.3" class="pilcrow">¶</a>
+</li>
+</ul>
+</li>
+<li class="normal" id="section-3.2-3.6">time(rx): At some point after the verification of Evidence, the Attester can no longer be considered Attested as trustworthy.<a href="#section-3.2-3.6" class="pilcrow">¶</a>
+</li>
+</ul>
+<div id="transport-and-encoding">
+<section id="section-3.2.1">
+          <h4 id="name-transport-and-encoding">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-transport-and-encoding" class="section-name selfRef">Transport and Encoding</a>
+          </h4>
+<p id="section-3.2.1-1">Network Management systems may retrieve signed PCR based Evidence as shown in <a href="#IETF-Attestation-Information-Flow" class="xref">Figure 5</a>, and can be accomplished via:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.1-2.1">XML, JSON, or CBOR encoded Evidence, using<a href="#section-3.2.1-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2.1-2.2">RESTCONF or NETCONF transport, over a<a href="#section-3.2.1-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-3.2.1-2.3">TLS or SSH secure tunnel<a href="#section-3.2.1-2.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-3.2.1-3">Retrieval of Log Evidence will be via log interfaces on the network device.  (For example, see <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span>).<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="peer-to-peer">
+<section id="section-3.3">
+        <h3 id="name-centralized-vs-peer-to-peer">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-centralized-vs-peer-to-peer" class="section-name selfRef">Centralized vs Peer-to-Peer</a>
+        </h3>
+<p id="section-3.3-1"><a href="#IETF-Attestation-Information-Flow" class="xref">Figure 5</a> above assumes that the Verifier is implicitly trusted, while the Attesting device is not.  In a Peer-to-Peer application such as two routers negotiating a trust relationship <span>[<a href="#I-D.voit-rats-trusted-path-routing" class="xref">I-D.voit-rats-trusted-path-routing</a>]</span>, the two peers can each ask the other to prove software integrity.  In this application, the information flow is the same, but each side plays a role both as an Attester and a Verifier.  Each device issues a challenge, and each device responds to the other's challenge, as shown in <a href="#Peer-to-peer-Information-Flow" class="xref">Figure 6</a>.  Peer-to-peer challenges, particularly if used to establish a trust relationship between routers, require devices to carry their own signed reference measurements (RIMs) so that each device has everything needed for attestation, without having to resort to a central authority.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<span id="name-peer-to-peer-attestation-in"></span><div id="Peer-to-peer-Information-Flow">
+<figure id="figure-6">
+          <div class="artwork art-text alignLeft" id="section-3.3-2.1">
+<pre>
++---------------+                             +---------------+
+|               |                             |               |
+| Endorser A    |                             | Endorser B    |
+| Firmware      |                             | Firmware      |
+| Configuration |                             | Configuration |
+| Authority     |                             | Authority     |
+|               |                             |               |
++---------------+                             +---------------+
+       |                                              |
+       |       +-------------+        +------------+  |
+       |       |             | Step 1 |            |  |   \
+       |       | Attester    |&lt;------&gt;| Verifier   |  |   |
+       |       |             |&lt;------&gt;|            |  |   |  Router B
+       +------&gt;|             | Step 2 |            |  |   |- Challenges
+        Step 0A|             |        |            |  |   |  Router A
+               |             |-------&gt;|            |  |   |
+               |- Router A --| Step 3 |- Router B -|  |   /
+               |             |        |            |  |
+               |             |        |            |  |
+               |             | Step 1 |            |  |   \
+               | Verifier    |&lt;------&gt;| Attester   |&lt;-+   |  Router A
+               |             |&lt;------&gt;|            |      |- Challenges
+               |             | Step 2 |            |      |  Router B
+               |             |        |            |      |
+               |             |&lt;-------|            |      |
+               +-------------+ Step 3 +------------+      /
+
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-peer-to-peer-attestation-in" class="selfRef">Peer-to-Peer Attestation Information Flow</a>
+          </figcaption></figure>
+</div>
+<p id="section-3.3-3">In this application, each device may need to be equipped with signed RIMs to act as an Attester, and also a selection of trusted x.509 root certificates to allow the device to act as a Verifier.   An existing link layer protocol such as 802.1x <span>[<a href="#IEEE-802.1x" class="xref">IEEE-802.1x</a>]</span> or 802.1AE <span>[<a href="#IEEE-802.1ae" class="xref">IEEE-802.1ae</a>]</span>, with Evidence being enclosed over a variant of EAP <span>[<a href="#RFC3748" class="xref">RFC3748</a>]</span> or LLDP <span>[<a href="#LLDP" class="xref">LLDP</a>]</span> are suitable methods for such an exchange.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-4">
+      <h2 id="name-privacy-considerations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-4-1">Networking Equipment, such as routers, switches and firewalls, has a key role to play in guarding the privacy of individuals using the network:<a href="#section-4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-2.1">
+          <p id="section-4-2.1.1">Packets passing through the device must not be sent to unauthorized destinations.  For example:<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-2.1.2.1">Routers often act as Policy Enforcement Points, where individual subscribers may be checked for
+authorization to access a network.  Subscriber login information must not be released to unauthorized parties.<a href="#section-4-2.1.2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-4-2.1.2.2">Networking Equipment is often called upon to block access to protected resources from unauthorized users.<a href="#section-4-2.1.2.2" class="pilcrow">¶</a>
+</li>
+</ul>
+</li>
+<li class="normal" id="section-4-2.2">Routing information, such as the identity of a router's peers, must not be leaked to unauthorized neighbors.<a href="#section-4-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-4-2.3">If configured, encryption and decryption of traffic must be carried out reliably, while protecting keys and credentials.<a href="#section-4-2.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-4-3">Functions that protect privacy are implemented as part of each layer of hardware and software that
+makes up the networking device.
+In light of these requirements for protecting the privacy of users of the network, the Network Equipment
+must identify itself, and its boot configuration and measured device state (for example, PCR values),
+to the Equipment's Administrator, so there's no uncertainty as to what function each device and
+configuration is configured to carry out. This allows the administrator to ensure that the network
+provides individual and peer privacy guarantees.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">RIV specifically addresses the collection of information from enterprise network devices by authorized 
+agents of the enterprise.  As such, privacy is a fundamental concern for those deploying this solution, given EU
+GDPR, California CCPA, and many other privacy regulations.  The enterprise should implement
+and enforce their duty of care.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">See <span>[<a href="#NetEq" class="xref">NetEq</a>]</span> for more context on privacy in networking devices<a href="#section-4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-cons">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1">Attestation results from the RIV procedure are subject to a number of attacks:<a href="#section-5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-2.1">Keys may be compromised<a href="#section-5-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-2.2">A counterfeit device may attempt to impersonate (spoof) a known authentic device<a href="#section-5-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-2.3">Man-in-the-middle attacks may be used by a counterfeit device to attempt to deliver
+responses that originate in an actual authentic device<a href="#section-5-2.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-2.4">Replay attacks may be attempted by a compromised device<a href="#section-5-2.4" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-3">Trustworthiness of RIV attestation depends strongly on the validity of keys used for identity
+and attestation reports.  RIV takes full advantage of TPM capabilities to ensure that results can be trusted.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">Two sets of keys are relevant to RIV attestation<a href="#section-5-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-5.1">A DevID key is used to certify the identity of the device in which the TPM is installed.<a href="#section-5-5.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-5.2">An Attestation Key (AK) key signs attestation reports, (called 'quotes' in TCG documents),
+used to provide evidence for integrity of the software on the device.<a href="#section-5-5.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-6">TPM practices usually require that these keys be different, as a way of ensuring that a general-purpose
+signing key cannot be used to spoof an attestation quote.<a href="#section-5-6" class="pilcrow">¶</a></p>
+<p id="section-5-7">In each case, the private half of the key is known only to the TPM, and cannot be
+retrieved externally, even by a trusted party.  To ensure that's the case,
+specification-compliant private/public key-pairs are generated inside the TPM, where they're never
+exposed, and cannot be extracted (See <span>[<a href="#Platform-DevID-TPM-2.0" class="xref">Platform-DevID-TPM-2.0</a>]</span>).<a href="#section-5-7" class="pilcrow">¶</a></p>
+<p id="section-5-8">Keeping keys safe is just part of attestation security; knowing which keys are bound
+to the device in question is just as important.<a href="#section-5-8" class="pilcrow">¶</a></p>
+<p id="section-5-9">While there are many ways to manage keys in a TPM (See <span>[<a href="#Platform-DevID-TPM-2.0" class="xref">Platform-DevID-TPM-2.0</a>]</span>), RIV includes
+support for "zero touch" provisioning (also known as zero-touch onboarding) of fielded
+devices (e.g. Secure ZTP, <span>[<a href="#RFC8572" class="xref">RFC8572</a>]</span>), where keys which have predictable trust properties are
+provisioned by the device vendor.<a href="#section-5-9" class="pilcrow">¶</a></p>
+<p id="section-5-10">Device identity in RIV is based on IEEE 802.1AR DevID. This specification provides several elements<a href="#section-5-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-11.1">A DevID requires a unique key pair for each device, accompanied by an x.509 certificate<a href="#section-5-11.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-11.2">The private portion of the DevID key is to be stored in the device, in a manner that provides confidentiality (Section 6.2.5 <span>[<a href="#IEEE-802-1AR" class="xref">IEEE-802-1AR</a>]</span>)<a href="#section-5-11.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-12">The x.509 certificate contains several components<a href="#section-5-12" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-13.1">The public part of the unique DevID key assigned to that device<a href="#section-5-13.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-13.2">An identifying string that's unique to the manufacturer of the device.  This is normally the
+serial number of the unit, which might also be printed on a label on the device.<a href="#section-5-13.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-13.3">The certificate must be signed by a key traceable to the manufacturer's root key.<a href="#section-5-13.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-14">With these elements, the device's manufacturer and serial number can be identified by analyzing the
+DevID certificate plus the chain of intermediate certs leading back to the manufacturer's root
+certificate.  As is conventional in TLS connections, a nonce must be signed by the device
+in response to a challenge,
+proving possession of its DevID private key.<a href="#section-5-14" class="pilcrow">¶</a></p>
+<p id="section-5-15">RIV uses the DevID to validate a TLS connection to the device as the attestation session begins.  Security of
+this process derives from TLS security, with the DevID providing proof that the TLS session terminates on
+the intended device. <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>.<a href="#section-5-15" class="pilcrow">¶</a></p>
+<p id="section-5-16">Evidence of software integrity is delivered in the form of a quote signed by the TPM
+itself.  Because the contents of the quote are signed inside the TPM, any external
+modification (including reformatting to a different data format) will be detected
+as tampering.<a href="#section-5-16" class="pilcrow">¶</a></p>
+<p id="section-5-17">A critical feature of the YANG model described in <span>[<a href="#I-D.ietf-rats-yang-tpm-charra" class="xref">I-D.ietf-rats-yang-tpm-charra</a>]</span> is the ability to carry TPM data structures in their native format, without requiring any changes to the structures as they were signed and delivered by the TPM.  While alternate methods of conveying TPM quotes could compress out redundant information, or add an additional layer of signing using external keys, the important part is to preserve the TPM signing, so that tampering anywhere in the path between the TPM itself and the Verifier can be detected.<a href="#section-5-17" class="pilcrow">¶</a></p>
+<p id="section-5-18">Prevention of spoofing attacks against attestation systems is also important.  There are two cases to consider:<a href="#section-5-18" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-19.1">The entire device could be spoofed, that is, when the Verifier goes to verify a specific device, it might be redirected to a different device.  Use of the 802.1AR identity in the TPM ensures that the Verifier's TLS session is in fact terminating on the right device.<a href="#section-5-19.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-19.2">A compromised device could respond with a spoofed attestation result, that is, a compromised OS could return a fabricated quote.<a href="#section-5-19.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-20">Protection against spoofed quotes from a device with valid identity is a bit more complex.
+An identity key must be available to sign any kind of nonce or hash offered by the verifier,
+and consequently, could be used to sign a fabricated quote.  To block spoofed attestation
+result, the quote generated inside the TPM must be signed by
+a key that's different from the DevID, called an Attestation Key (AK).<a href="#section-5-20" class="pilcrow">¶</a></p>
+<p id="section-5-21">Given separate Attestation and DevID keys, the
+binding between the AK and the same device must also be proven to
+prevent a man-in-the-middle attack (e.g. the 'Asokan Attack' <span>[<a href="#RFC6813" class="xref">RFC6813</a>]</span>).<a href="#section-5-21" class="pilcrow">¶</a></p>
+<p id="section-5-22">This is accomplished in RIV through use of an AK certificate with the same elements as the DevID
+(i.e., same manufacturer's serial number, signed by the same manufacturer's key), but containing
+the device's unique AK public key instead of the DevID public key. 
+[Editor's Note: does this require an OID that says the key is known by the CA to be an Attestation key?]<a href="#section-5-22" class="pilcrow">¶</a></p>
+<p id="section-5-23">These two keys and certificates are used together:<a href="#section-5-23" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-24.1">The DevID is used to validate a TLS connection terminating on the device with a known serial number.<a href="#section-5-24.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-24.2">The AK is used to sign attestation quotes, providing proof that the attestation
+evidence comes from the same device.<a href="#section-5-24.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-25">Replay attacks, where results of a previous attestation are submitted in response to subsequent requests,
+are usually prevented by inclusion of a nonce in the request to the TPM
+for a quote.  Each request from the Verifier includes a new random number (a nonce). The resulting
+quote signed by the TPM contains the same nonce, allowing the verifier to determine
+freshness, i.e., that the resulting quote was generated in response to the verifier's specific request.
+Time-Based Uni-directional Attestation <span>[<a href="#I-D.birkholz-rats-tuda" class="xref">I-D.birkholz-rats-tuda</a>]</span> provides an alternate mechanism
+to verify freshness without requiring a request/response cycle.<a href="#section-5-25" class="pilcrow">¶</a></p>
+<p id="section-5-26">Requiring results of attestation of the operating software to be signed by a key known only to the TPM also
+removes the need to trust the device's operating software (beyond the first measurement; see below); any
+changes to the quote, generated and signed by the TPM itself, made by malicious device software, or in
+the path back to the verifier, will invalidate the signature on the quote.<a href="#section-5-26" class="pilcrow">¶</a></p>
+<p id="section-5-27">Although RIV recommends that device manufacturers pre-provision devices with easily-verified DevID and AK certs,
+use of those credentials is not mandatory.  IEEE 802.1AR incorporates the idea of an Initial Device ID
+(IDevID), provisioned by the manufacturer, and a Local Device ID (LDevID) provisioned by the owner of
+the device.  RIV extends that concept by defining an Initial Attestation Key (IAK) and Local Attestation
+Key (LAK) with the same properties.<a href="#section-5-27" class="pilcrow">¶</a></p>
+<p id="section-5-28">Device owners can use any method to provision the Local credentials.<a href="#section-5-28" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-29.1">TCG document <span>[<a href="#Platform-DevID-TPM-2.0" class="xref">Platform-DevID-TPM-2.0</a>]</span> shows how the initial Attestation
+keys can be used to certify LDevID and LAK keys.  Use of the LDevID and LAK allows the device owner
+to use a uniform identity structure across device types from multiple manufacturers (in the same way
+that an "Asset Tag" is used by many enterprises to identify devices they own).  TCG doc
+<span>[<a href="#Provisioning-TPM-2.0" class="xref">Provisioning-TPM-2.0</a>]</span> also contains guidance on provisioning identity keys in TPM 2.0.<a href="#section-5-29.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-29.2">But device owners can use any other mechanism they want to assure themselves that Local identity
+certificates are inserted into the intended device, including physical inspection and programming
+in a secure location, if they prefer to avoid placing trust in the manufacturer-provided keys.<a href="#section-5-29.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-30">Clearly, Local keys can't be used for secure Zero Touch provisioning; installation of the Local keys
+can only be done by some process that runs before the device is configured for network operation.<a href="#section-5-30" class="pilcrow">¶</a></p>
+<p id="section-5-31">On the other end of the device life cycle, provision should be made to wipe Local keys when a device
+is decommissioned, to indicate that the device is no longer owned by the enterprise.  The manufacturer's
+Initial identity keys must be preserved, as they contain no information that's not already printed on
+the device's serial number plate.<a href="#section-5-31" class="pilcrow">¶</a></p>
+<p id="section-5-32">In addition to trustworthy provisioning of keys, RIV depends on other trust anchors.  (See <span>[<a href="#GloPlaRoT" class="xref">GloPlaRoT</a>]</span> for definitions of Roots of Trust.)<a href="#section-5-32" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-33.1">Secure identity depends on mechanisms to prevent per-device secret keys from being compromised.  The TPM
+provides this capability as a Root of Trust for Storage<a href="#section-5-33.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-33.2">Attestation depends on an unbroken chain of measurements, starting from the very first measurement.
+That first measurement is made by code called the Root of Trust for Measurement, typically done by trusted
+firmware stored in boot flash.  Mechanisms for maintaining the trustworthiness of the RTM are out of
+scope for RIV, but could include immutable firmware, signed updates, or a vendor-specific hardware
+verification technique.<a href="#section-5-33.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-5-33.3">RIV assumes some level of physical defense for the device.  If a TPM that has already been programmed
+with an authentic DevID is stolen and inserted into a counterfeit device, attestation of that counterfeit
+device may become indistinguishable from an authentic device.<a href="#section-5-33.3" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-5-34">RIV also depends on reliable reference measurements, as expressed by the RIM <span>[<a href="#RIM" class="xref">RIM</a>]</span>.  The definition of
+trust procedures for RIMs is out of scope for RIV, and the device owner is free to use any policy to validate
+a set of reference measurements.  RIMs may be conveyed out-of-band or in-band, as part of the attestation
+process (see <a href="#RIM-policy" class="xref">Section 3.1.3</a>).  But for embedded devices, where software is usually shipped as a self-contained
+package, RIMs signed by the manufacturer and delivered in-band may be more convenient for the device owner.<a href="#section-5-34" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conclusion">
+<section id="section-6">
+      <h2 id="name-conclusion">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-conclusion" class="section-name selfRef">Conclusion</a>
+      </h2>
+<p id="section-6-1">TCG technologies can play an important part in the implementation of Remote
+Integrity Verification.  Standards for many of the components needed for
+implementation of RIV already exist:<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1">Platform identity can be based on IEEE 802.1AR Device identity, coupled with
+careful supply-chain management by the manufacturer.<a href="#section-6-2.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-6-2.2">Complex supply chains can be certified using TCG Platform Certificates <span>[<a href="#Platform-Certificates" class="xref">Platform-Certificates</a>]</span><a href="#section-6-2.2" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-6-2.3">The TCG TAP mechanism can be used to retrieve attestation evidence.  Work
+is needed on a YANG model for this protocol.<a href="#section-6-2.3" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-6-2.4">Reference Measurements must be conveyed from the software authority (e.g.,
+the manufacturer) to the system in which verification will take place.  IETF
+CoSWID work forms the basis for this, but new work is needed to create an
+information model and YANG implementation.<a href="#section-6-2.4" class="pilcrow">¶</a>
+</li>
+</ul>
+</section>
+</div>
+<div id="IANA">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">This memo includes no request to IANA.<a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="appendix">
+<section id="section-8">
+      <h2 id="name-appendix">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-appendix" class="section-name selfRef">Appendix</a>
+      </h2>
+<div id="layering-model-for-network-equipment-attester-and-verifier">
+<section id="section-8.1">
+        <h3 id="name-layering-model-for-network-">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-layering-model-for-network-" class="section-name selfRef">Layering Model for Network Equipment Attester and Verifier</a>
+        </h3>
+<p id="section-8.1-1">Retrieval of identity and attestation state uses one protocol stack, while
+retrieval of Reference Measurements uses a different set of protocols.  Figure
+5 shows the components involved.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<span id="name-riv-protocol-stacks"></span><div id="RIV-Protocol-Stacks">
+<figure id="figure-7">
+          <div class="artwork art-text alignLeft" id="section-8.1-2.1">
+<pre>
++-----------------------+              +-------------------------+
+|                       |              |                         |
+|       Attester        |&lt;-------------|        Verifier         |
+|       (Device)        |-------------&gt;|   (Management Station)  |
+|                       |      |       |                         |
++-----------------------+      |       +-------------------------+
+                               |
+           -------------------- --------------------
+           |                                        |
+---------------------------------- ---------------------------------
+|Reference Integrity Measurements| |         Attestation           |
+---------------------------------- ---------------------------------
+
+********************************************************************
+*         IETF Attestation Reference Interaction Diagram           *
+********************************************************************
+
+    .......................         .......................
+    . Reference Integrity .         .  TAP (PTS2.0) Info  .
+    .      Manifest       .         . Model and Canonical .
+    .                     .         .     Log Format      .
+    .......................         .......................
+
+    *************************  .............. **********************
+    * YANG SWID Module      *  . TCG        . * YANG Attestation   *
+    * I-D.birkholz-yang-swid*  . Attestation. * Module             *
+    *                       *  . MIB        . * I-D.ietf-rats-     *
+    *                       *  .            . * yang-tpm-charra    *
+    *************************  .............. **********************
+
+    *************************  ************ ************************
+    * XML, JSON, CBOR (etc) *  *    UDP   * * XML, JSON, CBOR (etc)*
+    *************************  ************ ************************
+
+    *************************               ************************
+    *   RESTCONF/NETCONF    *               *   RESTCONF/NETCONF   *
+    ************************               *************************
+
+    *************************               ************************
+    *       TLS, SSH        *               *       TLS, SSH       *
+    *************************               ************************
+
+</pre>
+</div>
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
+<a href="#name-riv-protocol-stacks" class="selfRef">RIV Protocol Stacks</a>
+          </figcaption></figure>
+</div>
+<p id="section-8.1-3">IETF documents are captured in boxes surrounded by asterisks. TCG documents
+are shown in boxes surrounded by dots. The IETF Attestation Reference Interaction
+Diagram, Reference Integrity Manifest, TAP Information Model
+and Canonical Log Format, and both YANG modules are works in progress. Information
+Model layers describe abstract data objects that can be requested, and the
+corresponding response SNMP is still widely used, but the industry is transitioning
+to YANG, so in some cases, both will be required. TLS Authentication with
+TPM has been shown to work; SSH authentication using TPM-protected keys is
+not as easily done [as of 2019]<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<div id="why-is-os-attestation-different">
+<section id="section-8.1.1">
+          <h4 id="name-why-is-os-attestation-diffe">
+<a href="#section-8.1.1" class="section-number selfRef">8.1.1. </a><a href="#name-why-is-os-attestation-diffe" class="section-name selfRef">Why is OS Attestation Different?</a>
+          </h4>
+<p id="section-8.1.1-1">Even in embedded systems, adding Attestation at the OS level (e.g. Linux
+IMA, Integrity Measurement Architecture <span>[<a href="#IMA" class="xref">IMA</a>]</span>) increases the number of objects to
+be attested by one or two orders of
+magnitude, involves software that's updated and changed frequently, and introduces
+processes that begin in an unpredictable order.<a href="#section-8.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1.1-2">TCG and others (including the Linux community) are working on methods and
+procedures for attesting the operating system and application software, but
+standardization is still in process.<a href="#section-8.1.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="implementation-notes">
+<section id="section-8.2">
+        <h3 id="name-implementation-notes">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-implementation-notes" class="section-name selfRef">Implementation Notes</a>
+        </h3>
+<p id="section-8.2-1">Table 1 summarizes many of the actions needed to complete an Attestation
+system, with links to relevant documents.  While documents are controlled
+by several standards organizations, the implied actions required for
+implementation are all the responsibility of the manufacturer of the device,
+unless otherwise noted.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<span id="name-component-status"></span><div id="Component-Status">
+<figure id="figure-8">
+          <div class="artwork art-text alignLeft" id="section-8.2-2.1">
+<pre>
++------------------------------------------------------------------+
+|             Component                           |  Controlling   |
+|                                                 | Specification  |
+--------------------------------------------------------------------
+| Make a Secure execution environment             |   TCG RoT      |
+|   o Attestation depends on a secure root of     |   UEFI.org     |
+|     trust for measurement outside the TPM, as   |                |
+|     well as roots for storage and reporting     |                |
+|     inside the TPM.                             |                |
+|   o  Refer to TCG Root of Trust for Measurement.|                |
+|   o  NIST SP 800-193 also provides guidelines   |                |
+|      on Roots of Trust                          |                |
+--------------------------------------------------------------------
+| Provision the TPM as described in               | TCG TPM DevID  |
+|   TCG documents.                                | TCG Platform   |
+|                                                 |   Certificate  |
+--------------------------------------------------------------------
+| Put a DevID or Platform Cert in the TPM         | TCG TPM DevID  |
+|    o Install an Initial Attestation Key at the  | TCG Platform   |
+|      same time so that Attestation can work out |   Certificate  |
+|      of the box                                 |-----------------
+|    o Equipment suppliers and owners may want to | IEEE 802.1AR   |
+|      implement Local Device ID as well as       |                |
+|      Initial Device ID                          |                |
+--------------------------------------------------------------------
+| Connect the TPM to the TLS stack                | Vendor TLS     |
+|    o  Use the DevID in the TPM to authenticate  | stack (This    |
+|       TAP connections, identifying the device   | action is      |
+|                                                 | simply         |
+|                                                 | configuring TLS|
+|                                                 | to use the     |
+|                                                 | DevID as its   |
+|                                                 | trust anchor.) |
+--------------------------------------------------------------------
+| Make CoSWID tags for BIOS/LoaderLKernel objects | IETF CoSWID    |
+|    o  Add reference measurements into SWID tags | ISO/IEC 19770-2|
+|    o  Manufacturer should sign the SWID tags    | NIST IR 8060   |
+|    o  The TCG RIM-IM identifies further         |                |
+|       procedures to create signed RIM           |                |
+|       documents that provide the necessary      |                |
+|       reference information                     |                |
+--------------------------------------------------------------------
+|  Package the SWID tags with a vendor software   | Retrieve tags  |
+|  release                                        | with           |
+|    o  A tag-generator plugin such      | {{I-D.birkholz-yang-swid}}|
+|     as https://github.com/Labs64/swid-maven-plugin               |
+|     can be used                                 |----------------|
+|                                                 | TCG PC Client  |
+|                                                 | RIM            |
+--------------------------------------------------------------------
+|  Use PC Client measurement definitions          | TCG PC Client  |
+|  to define the use of PCRs                      | BIOS           |
+|  (although Windows  OS is rare on Networking    |                |
+|  Equipment, UEFI BIOS is not)                   |                |
+--------------------------------------------------------------------
+|  Use TAP to retrieve measurements               |                |
+|    o  Map TAP to SNMP                           | TCG SNMP MIB   |
+|    o  Map to YANG                               | YANG Module for|
+|  Use Canonical Log Format                       |   Basic        |
+|                                                 |   Attestation  |
+|                                                 | TCG Canonical  |
+|                                                 |   Log Format   |
+--------------------------------------------------------------------
+| Posture Collection Server (as described in IETF |                |
+|  SACMs ECP) should request the                  |                |
+|  attestation and analyze the result             |                |
+| The Management application might be broken down |                |
+|  to several more components:                    |                |
+|    o  A Posture Manager Server                  |                |
+|       which collects reports and stores them in |                |
+|       a database                                |                |
+|    o  One or more Analyzers that can look at the|                |
+|       results and figure out what it means.     |                |
+--------------------------------------------------------------------
+</pre>
+</div>
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<a href="#name-component-status" class="selfRef">Component Status</a>
+          </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="root-of-trust-for-measurement">
+<section id="section-8.3">
+        <h3 id="name-root-of-trust-for-measureme">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-root-of-trust-for-measureme" class="section-name selfRef">Root of Trust for Measurement</a>
+        </h3>
+<p id="section-8.3-1">The measurements needed for attestation require that the device being attested
+is equipped with a Root of Trust for Measurement, i.e., some trustworthy
+mechanism that can compute the first measurement in the chain of trust required
+to attest that each stage of system startup is verified, a Root of Trust for Storage (i.e., 
+the TPM PCRs) to record the results, and a Root of Trust
+for Reporting to report the results <span>[<a href="#TCGRoT" class="xref">TCGRoT</a>]</span>, <span>[<a href="#GloPlaRoT" class="xref">GloPlaRoT</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">While there are many complex aspects of a Root of Trust, two aspects that
+are important in the case of attestation are:<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.3-3.1">The first measurement computed by the Root of Trust for Measurement, and stored
+in the TPM's Root of Trust for Storage, is presumed to be correct.<a href="#section-8.3-3.1" class="pilcrow">¶</a>
+</li>
+<li class="normal" id="section-8.3-3.2">There must not be a way to reset the Root of Trust for Storage without re-entering
+the Root of Trust for Measurement code.<a href="#section-8.3-3.2" class="pilcrow">¶</a>
+</li>
+</ul>
+<p id="section-8.3-4">The first measurement must be computed by code that is implicitly trusted; if that
+first measurement can be subverted, none of the remaining measurements can
+be trusted. (See <span>[<a href="#NIST-SP-800-155" class="xref">NIST-SP-800-155</a>]</span>)<a href="#section-8.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-informative-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+      </h2>
+<dl class="references">
+<dt id="AIK-Enrollment">[AIK-Enrollment]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG Infrastructure Working GroupA CMC Profile for AIK Certificate Enrollment Version 1.0, Revision 7"</span>, <time datetime="2011-03">March 2011</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/IWG_CMC_Profile_Cert_Enrollment_v1_r7.pdf">https://trustedcomputinggroup.org/wp-content/uploads/IWG_CMC_Profile_Cert_Enrollment_v1_r7.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="Canonical-Event-Log">[Canonical-Event-Log]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT Canonical Event Log Format Version: 1.0, Revision: .12"</span>, <time datetime="2018-10">October 2018</time>. </dd>
+<dd class="break"></dd>
+<dt id="EFI-TPM">[EFI-TPM]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG EFI Platform Specification for TPM Family 1.1 or 1.2, Specification Version 1.22, Revision 15"</span>, <time datetime="2014-01">January 2014</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/EFI-Protocol-Specification-rev13-160330final.pdf">https://trustedcomputinggroup.org/wp-content/uploads/EFI-Protocol-Specification-rev13-160330final.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GloPlaRoT">[GloPlaRoT]</dt>
+<dd>
+<span class="refAuthor">GlobalPlatform Technology</span>, <span class="refTitle">"Root of Trust Definitions and Requirements Version 1.1"</span>, <time datetime="2018-06">June 2018</time>, <span>&lt;<a href="https://globalplatform.org/specs-library/globalplatform-root-of-trust-definitions-and-requirements/">https://globalplatform.org/specs-library/globalplatform-root-of-trust-definitions-and-requirements/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.birkholz-rats-tuda">[I-D.birkholz-rats-tuda]</dt>
+<dd>
+<span class="refAuthor">Fuchs, A.</span><span class="refAuthor">, Birkholz, H.</span><span class="refAuthor">, McDonald, I.</span><span class="refAuthor">, and C. Bormann</span>, <span class="refTitle">"Time-Based Uni-Directional Attestation"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-birkholz-rats-tuda-02</span>, <time datetime="2020-03-09">9 March 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-birkholz-rats-tuda-02.txt">http://www.ietf.org/internet-drafts/draft-birkholz-rats-tuda-02.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.birkholz-yang-swid">[I-D.birkholz-yang-swid]</dt>
+<dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refTitle">"Software Inventory YANG module based on Software Identifiers"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-birkholz-yang-swid-02</span>, <time datetime="2018-10-23">23 October 2018</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-birkholz-yang-swid-02.txt">http://www.ietf.org/internet-drafts/draft-birkholz-yang-swid-02.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-rats-architecture">[I-D.ietf-rats-architecture]</dt>
+<dd>
+<span class="refAuthor">Birkholz, H.</span><span class="refAuthor">, Thaler, D.</span><span class="refAuthor">, Richardson, M.</span><span class="refAuthor">, Smith, N.</span><span class="refAuthor">, and W. Pan</span>, <span class="refTitle">"Remote Attestation Procedures Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-architecture-04</span>, <time datetime="2020-05-21">21 May 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-rats-architecture-04.txt">http://www.ietf.org/internet-drafts/draft-ietf-rats-architecture-04.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-rats-eat">[I-D.ietf-rats-eat]</dt>
+<dd>
+<span class="refAuthor">Mandyam, G.</span><span class="refAuthor">, Lundblade, L.</span><span class="refAuthor">, Ballesteros, M.</span><span class="refAuthor">, and J. O'Donoghue</span>, <span class="refTitle">"The Entity Attestation Token (EAT)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-eat-03</span>, <time datetime="2020-02-20">20 February 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-rats-eat-03.txt">http://www.ietf.org/internet-drafts/draft-ietf-rats-eat-03.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-rats-yang-tpm-charra">[I-D.ietf-rats-yang-tpm-charra]</dt>
+<dd>
+<span class="refAuthor">Birkholz, H.</span><span class="refAuthor">, Eckel, M.</span><span class="refAuthor">, Bhandari, S.</span><span class="refAuthor">, Sulzen, B.</span><span class="refAuthor">, Voit, E.</span><span class="refAuthor">, Xia, L.</span><span class="refAuthor">, Laffey, T.</span><span class="refAuthor">, and G. Fedorkow</span>, <span class="refTitle">"A YANG Data Model for Challenge-Response-based Remote Attestation Procedures using TPMs"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-rats-yang-tpm-charra-02</span>, <time datetime="2020-06-24">24 June 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-rats-yang-tpm-charra-02.txt">http://www.ietf.org/internet-drafts/draft-ietf-rats-yang-tpm-charra-02.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-sacm-coswid">[I-D.ietf-sacm-coswid]</dt>
+<dd>
+<span class="refAuthor">Birkholz, H.</span><span class="refAuthor">, Fitzgerald-McKay, J.</span><span class="refAuthor">, Schmidt, C.</span><span class="refAuthor">, and D. Waltermire</span>, <span class="refTitle">"Concise Software Identification Tags"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-sacm-coswid-15</span>, <time datetime="2020-05-01">1 May 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-ietf-sacm-coswid-15.txt">http://www.ietf.org/internet-drafts/draft-ietf-sacm-coswid-15.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.richardson-rats-usecases">[I-D.richardson-rats-usecases]</dt>
+<dd>
+<span class="refAuthor">Richardson, M.</span><span class="refAuthor">, Wallace, C.</span><span class="refAuthor">, and W. Pan</span>, <span class="refTitle">"Use cases for Remote Attestation common encodings"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-richardson-rats-usecases-07</span>, <time datetime="2020-03-09">9 March 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-richardson-rats-usecases-07.txt">http://www.ietf.org/internet-drafts/draft-richardson-rats-usecases-07.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.voit-rats-trusted-path-routing">[I-D.voit-rats-trusted-path-routing]</dt>
+<dd>
+<span class="refAuthor">Voit, E.</span>, <span class="refTitle">"Trusted Path Routing"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-voit-rats-trusted-path-routing-02</span>, <time datetime="2020-06-10">10 June 2020</time>, <span>&lt;<a href="http://www.ietf.org/internet-drafts/draft-voit-rats-trusted-path-routing-02.txt">http://www.ietf.org/internet-drafts/draft-voit-rats-trusted-path-routing-02.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="IEEE-802-1AR">[IEEE-802-1AR]</dt>
+<dd>
+<span class="refAuthor">Seaman, M.</span>, <span class="refTitle">"802.1AR-2018 - IEEE Standard for Local and Metropolitan Area Networks - Secure Device Identity, IEEE Computer Society"</span>, <time datetime="2018-08">August 2018</time>. </dd>
+<dd class="break"></dd>
+<dt id="IEEE-802.1ae">[IEEE-802.1ae]</dt>
+<dd>
+<span class="refAuthor">Seaman, M.</span>, <span class="refTitle">"802.1AE MAC Security (MACsec)"</span>, <time datetime="2018">2018</time>, <span>&lt;<a href="https://1.ieee802.org/security/802-1ae/">https://1.ieee802.org/security/802-1ae/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="IEEE-802.1x">[IEEE-802.1x]</dt>
+<dd>
+<span class="refAuthor">IEEE Computer Society</span>, <span class="refTitle">"802.1X-2020 - IEEE Standard for Local and Metropolitan Area Networks--Port-Based Network Access Control"</span>, <time datetime="2020-02">February 2020</time>, <span>&lt;<a href="https://standards.ieee.org/standard/802_1X-2020.html">https://standards.ieee.org/standard/802_1X-2020.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="IMA">[IMA]</dt>
+<dd>
+<span class="refTitle">"Integrity Measurement Architecture"</span>, <time datetime="2019-06">June 2019</time>, <span>&lt;<a href="https://sourceforge.net/p/linux-ima/wiki/Home/">https://sourceforge.net/p/linux-ima/wiki/Home/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="LLDP">[LLDP]</dt>
+<dd>
+<span class="refAuthor">IEEE Computer Society</span>, <span class="refTitle">"802.1AB-2016 - IEEE Standard for Local and metropolitan area networks - Station and Media Access Control Connectivity Discovery"</span>, <time datetime="2016-03">March 2016</time>, <span>&lt;<a href="https://standards.ieee.org/standard/802_1AB-2016.html">https://standards.ieee.org/standard/802_1AB-2016.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NetEq">[NetEq]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG Guidance for Securing Network Equipment"</span>, <time datetime="2018-01">January 2018</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/TCG_Guidance_for_Securing_NetEq_1_0r29.pdf">https://trustedcomputinggroup.org/wp-content/uploads/TCG_Guidance_for_Securing_NetEq_1_0r29.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-IR-8060">[NIST-IR-8060]</dt>
+<dd>
+<span class="refAuthor">National Institute for Standards and Technology</span>, <span class="refTitle">"Guidelines for the Creation of Interoperable Software Identification (SWID) Tags"</span>, <time datetime="2016-04">April 2016</time>, <span>&lt;<a href="https://nvlpubs.nist.gov/nistpubs/ir/2016/NIST.IR.8060.pdf">https://nvlpubs.nist.gov/nistpubs/ir/2016/NIST.IR.8060.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-SP-800-155">[NIST-SP-800-155]</dt>
+<dd>
+<span class="refAuthor">National Institute for Standards and Technology</span>, <span class="refTitle">"BIOS Integrity Measurement Guidelines (Draft)"</span>, <time datetime="2011-12">December 2011</time>, <span>&lt;<a href="https://csrc.nist.gov/csrc/media/publications/sp/800-155/draft/documents/draft-sp800-155_dec2011.pdf">https://csrc.nist.gov/csrc/media/publications/sp/800-155/draft/documents/draft-sp800-155_dec2011.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PC-Client-BIOS-TPM-1.2">[PC-Client-BIOS-TPM-1.2]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG PC Client Specific Implementation Specification for Conventional BIOS, Specification Version 1.21 Errata, Revision 1.00"</span>, <time datetime="2012-02">February 2012</time>, <span>&lt;<a href="https://www.trustedcomputinggroup.org/wp-content/uploads/TCG_PCClientImplementation_1-21_1_00.pdf">https://www.trustedcomputinggroup.org/wp-content/uploads/TCG_PCClientImplementation_1-21_1_00.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PC-Client-BIOS-TPM-2.0">[PC-Client-BIOS-TPM-2.0]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"PC Client Specific Platform Firmware Profile Specification Family "2.0", Level 00 Revision 1.04"</span>, <time datetime="2019-06">June 2019</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/pc-client-specific-platform-firmware-profile-specification">https://trustedcomputinggroup.org/pc-client-specific-platform-firmware-profile-specification</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PC-Client-RIM">[PC-Client-RIM]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT: TCG PC Client Reference Integrity Manifest Specification, v.09"</span>, <time datetime="2019-12">December 2019</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/xx">https://trustedcomputinggroup.org/xx</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="Platform-Certificates">[Platform-Certificates]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT: TCG Platform Attribute Credential Profile, Specification Version 1.0, Revision 15, 07 December 2017"</span>, <time datetime="2017-12">December 2017</time>. </dd>
+<dd class="break"></dd>
+<dt id="Platform-DevID-TPM-2.0">[Platform-DevID-TPM-2.0]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT: TPM Keys for Platform DevID for TPM2, Specification Version 0.7, Revision 0"</span>, <time datetime="2018-10">October 2018</time>. </dd>
+<dd class="break"></dd>
+<dt id="Platform-ID-TPM-1.2">[Platform-ID-TPM-1.2]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TPM Keys for Platform Identity for TPM 1.2, Specification Version 1.0, Revision 3"</span>, <time datetime="2015-08">August 2015</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/TPM_Keys_for_Platform_Identity_v1_0_r3_Final.pdf">https://trustedcomputinggroup.org/wp-content/uploads/TPM_Keys_for_Platform_Identity_v1_0_r3_Final.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="Provisioning-TPM-2.0">[Provisioning-TPM-2.0]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG TPM v2.0 Provisioning Guidance"</span>, <time datetime="2015-03">March 2015</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/TCG-TPM-v2.0-Provisioning-Guidance-Published-v1r1.pdf">https://trustedcomputinggroup.org/wp-content/uploads/TCG-TPM-v2.0-Provisioning-Guidance-Published-v1r1.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3748">[RFC3748]</dt>
+<dd>
+<span class="refAuthor">Aboba, B.</span><span class="refAuthor">, Blunk, L.</span><span class="refAuthor">, Vollbrecht, J.</span><span class="refAuthor">, Carlson, J.</span><span class="refAuthor">, and H. Levkowetz, Ed.</span>, <span class="refTitle">"Extensible Authentication Protocol (EAP)"</span>, <span class="seriesInfo">RFC 3748</span>, <span class="seriesInfo">DOI 10.17487/RFC3748</span>, <time datetime="2004-06">June 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3748">https://www.rfc-editor.org/info/rfc3748</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6241">[RFC6241]</dt>
+<dd>
+<span class="refAuthor">Enns, R., Ed.</span><span class="refAuthor">, Bjorklund, M., Ed.</span><span class="refAuthor">, Schoenwaelder, J., Ed.</span><span class="refAuthor">, and A. Bierman, Ed.</span>, <span class="refTitle">"Network Configuration Protocol (NETCONF)"</span>, <span class="seriesInfo">RFC 6241</span>, <span class="seriesInfo">DOI 10.17487/RFC6241</span>, <time datetime="2011-06">June 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6241">https://www.rfc-editor.org/info/rfc6241</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6813">[RFC6813]</dt>
+<dd>
+<span class="refAuthor">Salowey, J.</span><span class="refAuthor"> and S. Hanna</span>, <span class="refTitle">"The Network Endpoint Assessment (NEA) Asokan Attack Analysis"</span>, <span class="seriesInfo">RFC 6813</span>, <span class="seriesInfo">DOI 10.17487/RFC6813</span>, <time datetime="2012-12">December 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6813">https://www.rfc-editor.org/info/rfc6813</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7950">[RFC7950]</dt>
+<dd>
+<span class="refAuthor">Bjorklund, M., Ed.</span>, <span class="refTitle">"The YANG 1.1 Data Modeling Language"</span>, <span class="seriesInfo">RFC 7950</span>, <span class="seriesInfo">DOI 10.17487/RFC7950</span>, <time datetime="2016-08">August 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7950">https://www.rfc-editor.org/info/rfc7950</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8446">[RFC8446]</dt>
+<dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8446">https://www.rfc-editor.org/info/rfc8446</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8572">[RFC8572]</dt>
+<dd>
+<span class="refAuthor">Watsen, K.</span><span class="refAuthor">, Farrer, I.</span><span class="refAuthor">, and M. Abrahamsson</span>, <span class="refTitle">"Secure Zero Touch Provisioning (SZTP)"</span>, <span class="seriesInfo">RFC 8572</span>, <span class="seriesInfo">DOI 10.17487/RFC8572</span>, <time datetime="2019-04">April 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8572">https://www.rfc-editor.org/info/rfc8572</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RIM">[RIM]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT: TCG Reference Integrity Manifest Information Model"</span>, <time datetime="2019-06">June 2019</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/TCG_RIM_Model_v1-r13_2feb20.pdf">https://trustedcomputinggroup.org/wp-content/uploads/TCG_RIM_Model_v1-r13_2feb20.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SWID">[SWID]</dt>
+<dd>
+<span class="refAuthor">The International Organization for Standardization/International Electrotechnical Commission</span>, <span class="refTitle">"Information Technology Software Asset Management Part 2: Software Identification Tag, ISO/IEC 19770-2"</span>, <time datetime="2015-10">October 2015</time>, <span>&lt;<a href="https://www.iso.org/standard/65666.html">https://www.iso.org/standard/65666.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="TAP">[TAP]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"DRAFT: TCG Trusted Attestation Protocol (TAP) Information Model for TPM Families 1.2 and 2.0 and DICE Family 1.0, Version 1.0, Revision 0.29"</span>, <time datetime="2018-10">October 2018</time>. </dd>
+<dd class="break"></dd>
+<dt id="TCGRoT">[TCGRoT]</dt>
+<dd>
+<span class="refAuthor">Trusted Computing Group</span>, <span class="refTitle">"TCG Roots of Trust Specification"</span>, <time datetime="2018-10">October 2018</time>, <span>&lt;<a href="https://trustedcomputinggroup.org/wp-content/uploads/TCG_Roots_of_Trust_Specification_v0p20_PUBLIC_REVIEW.pdf">https://trustedcomputinggroup.org/wp-content/uploads/TCG_Roots_of_Trust_Specification_v0p20_PUBLIC_REVIEW.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<div id="authors-addresses">
+<section id="section-appendix.a">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Guy Fedorkow (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"><span class="org">Juniper Networks, Inc.</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:gfedorkow@juniper.net" class="email">gfedorkow@juniper.net</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Eric Voit</span></div>
+<div dir="auto" class="left"><span class="org">Cisco Systems, Inc.</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:evoit@cisco.com" class="email">evoit@cisco.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jessica Fitzgerald-McKay</span></div>
+<div dir="auto" class="left"><span class="org">National Security Agency</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:jmfitz2@nsa.gov" class="email">jmfitz2@nsa.gov</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
