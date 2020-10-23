@@ -1118,7 +1118,7 @@ Prevention of spoofing attacks against attestation systems is also important.  T
 
 * The entire device could be spoofed. If the Verifier goes to appraise a specific Attester, it might be redirected to a different Attester.  Use of the 802.1AR Device Identity (DevID) in the TPM ensures that the Verifier's TLS or SSH session is in fact terminating on the right device.
 
-* A compromised device could respond with a spoofed Attestation Result, that is, a compromised OS could return a fabricated quote.
+* A device with a compromised OS could return a fabricated quote providing spoofed attestation Evidence.
 
 Protection against spoofed quotes from a device with valid identity is a bit more complex.
 An identity key must be available to sign any kind of nonce or hash offered by the Verifier,
@@ -1131,14 +1131,14 @@ binding between the AK and the same device must also be proven to
 prevent a man-in-the-middle attack (e.g., the 'Asokan Attack' {{RFC6813}}).
 
 This is accomplished in RIV through use of an AK certificate with the same elements as the DevID
-(i.e., same manufacturer's serial number, signed by the same manufacturer's key), but containing
+(same manufacturer's serial number, signed by the same manufacturer's key), but containing
 the device's unique AK public key instead of the DevID public key.  
 
 The TCG document TPM 2.0 Keys for Device Identity and Attestation {{Platform-DevID-TPM-2.0}} specifies
 OIDs for Attestation Certificates that allow the CA to mark a key as specifically known to be 
 an Attestation key.
 
-These two keys and certificates are used together:
+These two key-pairs and certificates are used together:
 
 * The DevID is used to validate a TLS connection terminating on the device with a known serial number.
 * The AK is used to sign attestation quotes, providing proof that the attestation
@@ -1169,32 +1169,34 @@ Device owners can use any method to provision the Local credentials.
 keys can be used to certify LDevID and LAK keys.  Use of the LDevID and LAK allows the device owner
 to use a uniform identity structure across device types from multiple manufacturers (in the same way
 that an "Asset Tag" is used by many enterprises to identify devices they own).  TCG document
-{{Provisioning-TPM-2.0}} also contains guidance on provisioning identity keys in TPM 2.0.
+{{Provisioning-TPM-2.0}} also contains guidance on provisioning Initial and Local identity keys in TPM 2.0.
 
-* Device owners, however, can use any other mechanism they want to assure themselves that Local identity
+* Device owners, however, can use any other mechanism they want to assure themselves that local identity
 certificates are inserted into the intended device, including physical inspection and programming
 in a secure location, if they prefer to avoid placing trust in the manufacturer-provided keys.
 
-Clearly, Local keys can't be used for secure Zero Touch provisioning; installation of the Local keys
+Clearly, local keys can't be used for secure Zero Touch provisioning; installation of the local keys
 can only be done by some process that runs before the device is installed for network operation.
 
-On the other end of the device life cycle, provision should be made to wipe Local keys when a device
+On the other end of the device life cycle, provision should be made to wipe local keys when a device
 is decommissioned, to indicate that the device is no longer owned by the enterprise.  The manufacturer's
 Initial identity keys must be preserved, as they contain no information that's not already printed on
 the device's serial number plate.
 
-## Other Trust Anchors
+## Other Factors for Trustworthy Operation
 
-In addition to trustworthy provisioning of keys, RIV depends on other trust anchors.  (See {{SP800-155}} for definitions of Roots of Trust.)
+In addition to trustworthy provisioning of keys, RIV depends on a number of other factors for trustworthy operation.
 
 * Secure identity depends on mechanisms to prevent per-device secret keys from being compromised.  The TPM
 provides this capability as a Root of Trust for Storage.
 
-* Attestation depends on an unbroken chain of measurements, starting from the very first measurement.
-That first measurement is made by code called the Root of Trust for Measurement, typically done by trusted
+* Attestation depends on an unbroken chain of measurements, starting from the very first 
+measurement.  See {{using-tpm}} for background on TPM practices.
+
+* That first measurement is made by code called the Root of Trust for Measurement, typically done by trusted
 firmware stored in boot flash.  Mechanisms for maintaining the trustworthiness of the RTM are out of
 scope for RIV, but could include immutable firmware, signed updates, or a vendor-specific hardware
-verification technique.  See {{using-tpm}} for background on TPM practices.
+verification technique.    See {{root-of-trust}} for background on roots of trust.
 
 * The device owner SHOULD provide some level of physical defense for the device.  If a TPM that has already been programmed
 with an authentic DevID is stolen and inserted into a counterfeit device, attestation of that counterfeit
@@ -1261,8 +1263,14 @@ Every time a PCR is extended, an entry should be added to the corresponding Even
 measurement hash plus informative fields offering hints as to what event it was that generated the security measurement.  
 The Event Log itself is protected against accidental manipulation, but it is implicitly tamper-evident – any 
 verification process can read the security measurement hash from the log events, compute the composite value 
-and compare that to what ended up in the PCR.   If there’s a discrepancy, the logs do not provide an accurate 
+and compare that to what ended up in the PCR.   If there’s no discrepancy, the logs do provide an accurate 
 view of what was placed into the PCR.
+
+Note that the composite hash-of-hashes recorded in PCRs is order-dependent, resulting in different PCR values for different 
+ordering of the same set of events (e.g. Event A followed by Event B yields a different PCR value than B followed by A).
+For single-threaded code, where both the events and their order are fixed, a Verifier may validate a single PCR value, and use the log only to diagnose a mismatch from reference values.  However, operating system code is usually 
+non-deterministic, meaning that there may never be a single "known good" PCR value.  In this case, the Verifier may have
+verify that the log is correct, and then analyze each item in the log to determine if it represents an authorized event.
 
 In a conventional TPM Attestation environment, the first measurement must be made and extended into the TPM by trusted 
 device code (called the Root of Trust for Measurement, RTM).  That first measurement should cover the segment of 
@@ -1301,7 +1309,7 @@ While there are many complex aspects of a Root of Trust, two aspects that
 are important in the case of attestation are:
 
 * The first measurement computed by the Root of Trust for Measurement, and stored
-  in the TPM's Root of Trust for Storage, is presumed to be correct.
+  in the TPM's Root of Trust for Storage, must be assumed to be correct.
 
 * There must not be a way to reset the Root of Trust for Storage without re-entering
   the Root of Trust for Measurement code.
@@ -1309,6 +1317,10 @@ are important in the case of attestation are:
 The first measurement must be computed by code that is implicitly trusted; if that
 first measurement can be subverted, none of the remaining measurements can
 be trusted. (See {{NIST-SP-800-155}})
+
+It's important to note that the trustworthyness of the RTM code cannot be assured by 
+the TPM or TPM supplier -- code or procedures external to the TPM must guarantee the 
+security of the RTM.
 
 
 ## Layering Model for Network Equipment Attester and Verifier
@@ -1367,18 +1379,6 @@ IETF documents are captured in boxes surrounded by asterisks. TCG documents
 are shown in boxes surrounded by dots. 
 
 
-
-### Why is OS Attestation Different?
-
-Even in embedded systems, adding Attestation at the OS level (e.g., Linux
-IMA, Integrity Measurement Architecture {{IMA}}) increases the number of objects to
-be attested by one or two orders of
-magnitude, involves software that's updated and changed frequently, and introduces
-processes that begin in an unpredictable order.
-
-TCG and others (including the Linux community) are working on methods and
-procedures for attesting the operating system and application software, but
-standardization is still in process.
 
 ## Implementation Notes
 
